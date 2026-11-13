@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "wrangler dev --port 8787 --persist-to ../.wrangler-shared",
     "deploy": "node -e \"console.error('Deployment is disabled. Use npm run deploy:production to deploy explicitly.'); process.exit(1)\"",
-    "deploy:production": "wrangler deploy --env production",
     "build:ci": "wrangler deploy --env production --dry-run --outdir dist",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "node scripts/d1.mjs migrations apply --local --persist-to ../.wrangler-shared",
@@ -26,7 +25,8 @@
     "test:integration": "vitest --run tests/integration",
     "test:property": "vitest --run tests/property",
     "test:performance": "vitest --run tests/performance",
-    "test:ci": "vitest --run --coverage --reporter=json --reporter=html"
+    "test:ci": "vitest --run --coverage --reporter=json --reporter=html",
+    "deploy:production": "wrangler deploy --env production"
   },
   "dependencies": {
     "@better-auth/oauth-provider": "^1.7.20",
@@ -44,7 +44,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260820.1",
     "@hono/zod-openapi": "^1.6.1",
-    "@types/better-auth": "^1.7.20",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^5.1.0",
     "@vitest/ui": "^5.1.0",
