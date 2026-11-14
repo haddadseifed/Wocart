@@ -151,7 +151,10 @@ describe("home adsorption — the shipped document", () => {
     expect(shipped.issues).toEqual([]);
     expect(shipped.page?.sections.map((s) => s.type)).toEqual([
       "hero",
+      "category-cards",
+      "featured-products",
       "rich-text",
+      "how-it-works",
       "features-bar",
     ]);
   });
@@ -173,12 +176,15 @@ describe("home adsorption — copy (contentKey bridge)", () => {
     const { render } = createHarness(client);
     const hero = await render(shippedSection("hero"));
     const story = await render(shippedSection("rich-text"));
+    const how = await render(shippedSection("how-it-works"));
     const features = await render(shippedSection("features-bar"));
     const promo = await render(inserted("whatsapp-cta"));
     expect(decode(hero)).toContain(en.heroTitle);
     expect(decode(hero)).toContain(en.heroCtaPrimary);
     expect(decode(story)).toContain("A more considered way to shop");
-    expect(decode(story)).toContain("SellerCove is preparing its first selection.");
+    expect(decode(story)).toContain("A good store should make decisions easier.");
+    expect(decode(how)).toContain(en.howItWorksTitle);
+    expect(decode(how)).toContain(en.howStep1Title);
     expect(decode(features)).toContain(en.feature1Title);
     expect(decode(promo)).toContain(en.promoTitle);
   });
@@ -276,7 +282,7 @@ describe("home adsorption — reviews (config default, override, in-section read
 
 describe("home adsorption — the full page", () => {
   it("renders every shipped section in order through one renderer cache", async () => {
-    const stub = createStorefrontStub([FEATURED, PLAIN], { "best-sellers": [FEATURED], "new-arrivals": [PLAIN] }, [PLAIN]);
+    const stub = createStorefrontStub([FEATURED, PLAIN], { featured: [FEATURED, PLAIN] }, [PLAIN]);
     const { render } = createHarness(stub.client, { ...TEST_CONFIG, reviewsEnabled: true });
     let html = "";
     for (const section of shipped.page?.sections ?? []) {
@@ -286,7 +292,10 @@ describe("home adsorption — the full page", () => {
 
     const order = [
       en.heroTitle,
+      en.categoriesSection,
+      en.featuredSection,
       "A more considered way to shop",
+      en.howItWorksTitle,
       en.feature1Title,
     ];
     let cursor = -1;
@@ -298,9 +307,9 @@ describe("home adsorption — the full page", () => {
 
     // The shipped home document has one product-backed section: the hero.
     // Editorial copy and the features strip must not trigger catalogue reads.
-    expect(stub.productsList.mock.calls.map(([filters]) => filters?.collection ?? "catalog")).toEqual(["featured"]);
-    expect(stub.categoriesList).not.toHaveBeenCalled();
+    expect(stub.productsList.mock.calls.map(([filters]) => filters?.collection ?? "catalog").sort()).toEqual(["catalog", "featured"]);
+    expect(stub.categoriesList).toHaveBeenCalledTimes(1);
     expect(text).toContain("Featured Watch");
-    expect(text).not.toContain("Plain Mug");
+    expect(text).toContain("Plain Mug");
   });
 });
