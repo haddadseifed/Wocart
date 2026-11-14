@@ -6,12 +6,12 @@ import type { ThankYouStrings } from "../types/thank-you";
 
 export const enThankYou: ThankYouStrings = {
   thankYouTitle: "Order received!",
-  thankYouSubtitle: "Thank you — we will contact you soon",
+  thankYouSubtitle: "Thank you — your order details have been received",
   orderNumberLabel: "Order number",
   totalAmountLabel: "Total amount",
   codNote: "Cash on delivery — no prepayment required",
   step1Title: "Order confirmation",
-  step1Sub: "We will contact you to confirm",
+  step1Sub: "Your order details are reviewed",
   step2Title: "Preparation",
   step2Sub: "& packaging",
   step3Title: "Delivery",
