@@ -243,7 +243,7 @@ describe("Property 2: Preservation - Initial Page Load Behavior", () => {
             <button id="qty-minus">-</button>
             <button id="qty-plus">+</button>
             
-            ${variants.map((v, i) => `<button class="variant-opt" data-option="Color" data-value="${v.variations.Color}">${v.variations.Color}</button>`).join('\n')}
+            ${variants.map((v) => `<button class="variant-opt" data-option="Color" data-value="${v.variations.Color}">${v.variations.Color}</button>`).join('\n')}
             
             <div id="price-display-desktop"></div>
             <input type="hidden" id="price-input" />
