@@ -265,6 +265,6 @@ export const SCHEME = {
   light: text("فاتح", "Clair", "Light"),
   stone: text("حجري", "Pierre", "Stone"),
   sand: text("رملي", "Sable", "Sand"),
-  saffron: text("زعفراني", "Safran", "Saffron"),
+  saffron: text("ذهبي", "Or", "Gold"),
   night: text("ليلي", "Nuit", "Night"),
 };
