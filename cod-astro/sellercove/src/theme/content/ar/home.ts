@@ -6,7 +6,7 @@ import type { HomeStrings } from "../types/home";
 
 export const arHome: HomeStrings = {
   heroTitle: "منتجات مفيدة. اختيار مدروس.",
-  heroSubtitle: "مجموعة مركّزة من المنتجات اليومية، نختارها لجودتها ووظيفتها وقيمتها على المدى الطويل.",
+  heroSubtitle: "مجموعة مختارة من المنتجات المفيدة، مع تفاصيل واضحة وقيمة عملية.",
   trust1Title: "اختيارات مدروسة",
   trust2Title: "معلومات واضحة",
   trust3Title: "مساعدة عند الحاجة",
@@ -39,8 +39,8 @@ export const arHome: HomeStrings = {
   feature2Sub: "التفاصيل قبل اتخاذ القرار",
   feature3Title: "طلب بسيط",
   feature3Sub: "بلا خطوات غير ضرورية",
-  feature5Title: "مصمم للتوسع",
-  feature5Sub: "متجر يستعد لما هو قادم",
+  feature5Title: "الدفع عند الاستلام",
+  feature5Sub: "للطلبات المؤهلة داخل الجزائر",
   promoTitle: "تحتاج إلى مساعدة في الاختيار؟",
   promoSub: "تواصل معنا إذا كان لديك سؤال عن منتج أو التوصيل.",
   promoCtaText: "تواصل مع SellerCove",
