@@ -131,14 +131,14 @@
   --clr-error: #b42318;
   --clr-error-bg: #fdf1f0;
   --clr-disabled: #9aa0a8;
-  --clr-highlight: #f2c14e;
-  --clr-on-highlight: #0f1626;
-  --clr-rating: #e8a100;
-  --clr-sale-soft: #fdecee;
-  --clr-overlay: color-mix(in oklab, #0b1220 55%, transparent);
+  --clr-highlight: #D4AF37;
+  --clr-on-highlight: #050505;
+  --clr-rating: #D4AF37;
+  --clr-sale-soft: color-mix(in oklab, #D4AF37 16%, #F7F5EF);
+  --clr-overlay: color-mix(in oklab, #050505 55%, transparent);
   --clr-clear: transparent;
   --clr-current: currentColor;
-  --overlay-dark: color-mix(in oklab, #0b1220 72%, transparent);
+  --overlay-dark: color-mix(in oklab, #050505 72%, transparent);
 
   --header-h: 4rem;
 
