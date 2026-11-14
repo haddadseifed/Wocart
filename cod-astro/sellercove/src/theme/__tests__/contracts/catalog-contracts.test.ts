@@ -38,11 +38,11 @@ describe("the catalog is valid", () => {
 });
 
 describe("the catalog's identity is deliberate", () => {
-  it("is named `theme-00`", () => {
+  it("uses its own stable SellerCove identity", () => {
     // ADR 0004: a catalog key names the *catalog*. Renaming it is a breaking
     // change for every saved document that references these type keys, so it
     // is pinned here rather than changed by accident.
-    expect(theme00.key).toBe("theme-00");
+    expect(theme00.key).toBe("sellercove");
   });
 
   it("carries a semver catalog version", () => {
