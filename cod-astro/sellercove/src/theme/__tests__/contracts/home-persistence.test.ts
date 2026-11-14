@@ -15,7 +15,6 @@
 import { testLocals, TEST_CONFIG } from "../support/locals";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { describe, expect, it, vi } from "vitest";
-import type { ProductList } from "@wocart/storefront";
 import type { StoreClient } from "@wocart/storefront/server";
 import InstanceView from "@wocart/theme/astro/InstanceView.astro";
 import { createReadCache } from "@wocart/theme/astro";
