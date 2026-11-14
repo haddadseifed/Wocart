@@ -16,24 +16,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Patterns that indicate user-facing strings (things users can see)
-const USER_FACING_PATTERNS = [
-  // Text content in HTML/JSX
-  />\s*([A-Za-z][^<>{]*[A-Za-z])\s*</g,
-  // Placeholder attributes
-  /placeholder\s*=\s*["']([^"']+)["']/g,
-  // Alt text
-  /alt\s*=\s*["']([^"']+)["']/g,
-  // Title attributes
-  /title\s*=\s*["']([^"']+)["']/g,
-  // Aria labels
-  /aria-label\s*=\s*["']([^"']+)["']/g,
-  // Button/link text in template literals
-  /`([^`]*[A-Za-z][^`]*)`/g,
-  // String literals that look like user text
-  /"([A-Za-z][^"]*[A-Za-z])"/g,
-  /'([A-Za-z][^']*[A-Za-z])'/g,
-];
+// User-facing text is checked by the scanner below, not by this obsolete regex list.
+
 
 // Patterns to IGNORE (not user-facing)
 const IGNORE_PATTERNS = [
