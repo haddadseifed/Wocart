@@ -48,8 +48,11 @@ const inScope = (definition: ComponentDefinition, surface: string) =>
 /** The sections a document places, including those its fixed and required blocks name. */
 function typesIn(node: unknown, found = new Set<string>()): Set<string> {
   if (node === null || typeof node !== "object") return found;
-  const type = (node as { type?: unknown }).type;
-  if (typeof type === "string") found.add(type);
+  const record = node as { id?: unknown; type?: unknown; props?: unknown };
+  const type = record.type;
+  // Rich-text documents also contain `type` fields (`doc`, `paragraph`, etc.);
+  // only page component instances carry an id or props object.
+  if (typeof type === "string" && ("id" in record || "props" in record)) found.add(type);
   for (const value of Object.values(node)) {
     if (Array.isArray(value)) value.forEach((child) => typesIn(child, found));
     else if (value !== null && typeof value === "object") typesIn(value, found);
