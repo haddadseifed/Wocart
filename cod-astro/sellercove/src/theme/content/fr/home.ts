@@ -6,7 +6,7 @@ import type { HomeStrings } from "../types/home";
 
 export const frHome: HomeStrings = {
   heroTitle: "Des essentiels, choisis avec intention.",
-  heroSubtitle: "Une sélection ciblée de produits utiles, choisis pour leur qualité, leur fonction et leur valeur durable.",
+  heroSubtitle: "Une sélection ciblée de produits utiles, avec des informations claires et une valeur pratique.",
   trust1Title: "Une sélection réfléchie",
   trust2Title: "Des informations claires",
   trust3Title: "Un accompagnement utile",
@@ -39,8 +39,8 @@ export const frHome: HomeStrings = {
   feature2Sub: "Les détails avant la décision",
   feature3Title: "Commande simple",
   feature3Sub: "Sans étapes inutiles",
-  feature5Title: "Pensé pour évoluer",
-  feature5Sub: "Une boutique prête pour la suite",
+  feature5Title: "Paiement à la livraison",
+  feature5Sub: "Pour les commandes éligibles en Algérie",
   promoTitle: "Besoin d'un conseil ?",
   promoSub: "Contactez-nous pour toute question sur un produit ou la livraison.",
   promoCtaText: "Contacter SellerCove",
