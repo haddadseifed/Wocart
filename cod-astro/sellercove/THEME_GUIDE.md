@@ -1,7 +1,6 @@
-# theme-00 — the Wocart reference theme
+# SellerCove — Wocart theme implementation guide
 
-theme-00 is Wocart's **reference theme**: the complete, working storefront that
-shows how a Wocart theme is built on the platform's SDKs. It is multi-language
+SellerCove is an independent storefront theme based on Wocart's reference implementation. This guide preserves the platform contract and architecture rules that the SellerCove theme must follow. It is multi-language
 (Arabic / French / English), RTL-first, conversion-focused, and neutral enough to
 fit any store — beauty, electronics, supplements, home goods, general retail.
 
