@@ -5,7 +5,7 @@
 import type { LayoutStrings } from "../types/layout";
 
 export const enLayout: LayoutStrings = {
-  announcementText: "Cash on Delivery Available Across Algeria",
+  announcementText: "Cash on delivery on eligible orders",
   announcePrevious: "Previous announcement",
   announceNext: "Next announcement",
 
@@ -14,7 +14,7 @@ export const enLayout: LayoutStrings = {
   navMenu: "Menu",
   navMenuClose: "Close menu",
 
-  footerAbout: "Your trusted online store in Algeria with cash on delivery",
+  footerAbout: "A focused collection of useful products, with clear details and support when you need it",
   footerQuickLinks: "Quick Links",
   footerSupport: "Customer Support",
   footerRights: "All rights reserved",
