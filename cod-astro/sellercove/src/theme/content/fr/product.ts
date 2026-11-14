@@ -11,11 +11,11 @@ export const frProduct: ProductStrings = {
   productReviewCount_many: "{count} d’avis",
   productReviewCount_other: "{count} avis",
   productSaving: "Économisez {amount}\u00A0{currency}",
-  productDeliveryNote: "Livraison partout en Algérie, à domicile ou au bureau du livreur",
+  productDeliveryNote: "Les options de livraison dépendent de votre adresse et de l’éligibilité de la commande",
   productCountdownLabel: "L’offre se termine dans",
   productDescriptionTitle: "Description",
   productPoliciesTitle: "Livraison et retours",
   productAssureNoPrepay: "Rien à payer d’avance",
   productAssureCall: "Un appel pour confirmer",
-  productAssureDelivery: "Livré partout en Algérie",
+  productAssureDelivery: "Couverture confirmée à la commande",
 };
