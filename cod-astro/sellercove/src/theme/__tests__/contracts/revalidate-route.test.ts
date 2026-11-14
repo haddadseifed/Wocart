@@ -36,7 +36,7 @@ async function sign(payload: Record<string, unknown>) {
   return `${head}.${body}.${b64url(signature)}`;
 }
 const now = () => Math.floor(Date.now() / 1000);
-const revalidation = (over: Record<string, unknown> = {}) => ({ aud: STORE, theme: "theme-00", use: "revalidate", iat: now(), exp: now() + 120, ...over });
+const revalidation = (over: Record<string, unknown> = {}) => ({ aud: STORE, theme: "sellercove", use: "revalidate", iat: now(), exp: now() + 120, ...over });
 
 async function call(authorization?: string) {
   const invalidate = vi.fn(async () => {});
@@ -61,7 +61,7 @@ describe("the revalidation route", () => {
 
   it("drops nothing for a preview pass, another store's or theme's token, or none", async () => {
     const tokens = [
-      await sign({ aud: STORE, theme: "theme-00", editor: "https://cloud.codflow.store", iat: now(), exp: now() + 600 }),
+      await sign({ aud: STORE, theme: "sellercove", editor: "https://cloud.codflow.store", iat: now(), exp: now() + 600 }),
       await sign(revalidation({ aud: "https://other.dz" })),
       await sign(revalidation({ theme: "aurora" })),
     ];
