@@ -38,7 +38,7 @@ export const frMisc: MiscStrings = {
   ariaStarRating_many: "{count} d'étoiles",
   ariaStarRating_other: "{count} étoiles",
   thankYouPageTitle: "Commande reçue",
-  defaultMetaDescription: "Achetez chez {storeName} - Les meilleurs produits à des prix abordables avec livraison dans toutes les wilayas",
+  defaultMetaDescription: "Découvrez {storeName} : des produits utiles, des informations claires et une commande simple",
   productPageTitle: "{product} - {storeName}",
   collectionPageTitle: "{collection} - {storeName}",
   documentTitle: "{title} - {storeName}",
