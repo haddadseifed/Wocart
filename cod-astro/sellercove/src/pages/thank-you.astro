@@ -1,0 +1,49 @@
+---
+import { createReadCache } from "@wocart/theme/astro";
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import Sections from "@/theme/components/surface/Sections.astro";
+import { thankYouCatalog } from "@/theme/catalog/families/thank-you";
+import { readThankYou } from "@wocart/storefront";
+import { conversionTag } from "@wocart/storefront/astro";
+
+const { orderNumber, orderId, total } = readThankYou(Astro.url);
+
+// Which pixel this ORDER belongs to, and whether a browser event fires for it.
+//
+// This page knows the order id and nothing about which landing page the
+// shopper came from. It must not guess: attribution is best-effort server-side
+// (an unknown, draft or archived slug leaves an order unattributed), so a slug
+// read from the URL could name a pixel the server never recorded — and Meta
+// deduplicates per pixel, so a browser and a server that disagree write two
+// conversions into two ad accounts instead of merging them into one.
+//
+// The store context is on `Astro.locals` (middleware — Theme Zero S2); the
+// tracking lookup is independent — it only needs the order id.
+const { config, content, client } = Astro.locals.store;
+const [tracking, saved] = await Promise.all([client.orders.tracking(orderId), client.pageData.get("thank-you")]);
+
+if (!orderNumber) {
+  return Astro.redirect(Astro.locals.store.href("/"));
+}
+
+// The server returns the DECISION, not the configuration: the order's pixel,
+// the event (null when the merchant's conversion fires further down the
+// funnel) and its id. The head loads the order's pixel, not the store's;
+// when the lookup failed none loads, and the server's copy arrives anyway.
+const pageConfig = { ...config, pixelId: tracking?.pixelId ?? null };
+
+---
+
+<StoreLayout
+  config={pageConfig}
+  title={`${content.thankYouPageTitle} — ${config.name}`}
+  noindex={true}
+  softNavigation={false}
+>
+  <Sections theme={thankYouCatalog} surface="thank-you" document={saved} params={{ orderNumber, total: total === null ? undefined : String(total), surface: "thank-you" }} reads={createReadCache()} />
+  <Fragment set:html={conversionTag(tracking, total)} />
+</StoreLayout>
+
+
+<div data-order-placed data-order-id={orderId} data-order-number={orderNumber} hidden></div>
+<script src="../theme/scripts/thank-you.ts"></script>

@@ -1,0 +1,16 @@
+---
+// Where a shopper's order is, in the store's composition of the page. The
+// lookup is an action a plain form posts, so the answer renders from the same
+// POST and is never cached.
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import Sections from "@/theme/components/surface/Sections.astro";
+import { trackOrderCatalog } from "@/theme/catalog/families/track-order";
+import { message } from "@/theme/content/messages";
+
+const { config, content, locale, client } = Astro.locals.store;
+const saved = await client.pageData.get("track-order");
+---
+
+<StoreLayout title={message(content, "documentTitle", { title: content.trackTitle, storeName: config.name }, locale)} description={content.trackIntro} noindex={true}>
+  <Sections theme={trackOrderCatalog} surface="track-order" document={saved} params={{ surface: "track-order" }} />
+</StoreLayout>

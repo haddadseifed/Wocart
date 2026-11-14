@@ -1,0 +1,74 @@
+---
+import type { Offer, ProductDetail } from "@wocart/storefront";
+import type { StoreFrontContent } from "@/theme/content";
+import { formatCurrency } from "@/theme/utils/money";
+
+interface Props {
+  product: ProductDetail;
+  basePrice: number;
+  cur: string;
+  offers: Offer[];
+  content: StoreFrontContent;
+}
+
+const { product, basePrice, cur, offers, content } = Astro.props;
+---
+
+<div class="summary">
+  <p class="summary-line">
+    <span class="summary-name">
+      <span id="summary-qty-label" class="num">1 ×</span>
+      <span>{product.name}</span>
+    </span>
+    <span id="summary-item-price" class="num summary-amount">{formatCurrency(basePrice, cur)}</span>
+  </p>
+
+  <!-- Coupon line: filled by the product script from the server's quote -->
+  <p id="summary-coupon-row" class="summary-line is-good" data-label-template={content.couponSummaryLabel} hidden>
+    <span data-coupon-label></span>
+    <span class="num summary-amount" data-coupon-amount></span>
+  </p>
+
+  <p class="summary-line">
+    <span>{content.shippingLabel}</span>
+    <span id="summary-shipping" class="num summary-amount is-quiet">{content.shippingCalculated}</span>
+  </p>
+
+  {offers.map((offer) => {
+    const isFreeShipping = offer.discountType === "free_shipping";
+    const rewardLabel = offer.rewardProductName + (offer.rewardVariantLabel ? ` (${offer.rewardVariantLabel})` : "");
+    return (
+      <p id={`offer-row-${offer.id}`} class="hidden summary-line is-good">
+        {isFreeShipping ? (
+          <>
+            <span>{content.shippingLabel}</span>
+            <span class="summary-amount">{content.offerFreeShippingBadge}</span>
+          </>
+        ) : (
+          <>
+            <span>{rewardLabel} × {offer.rewardQuantity}</span>
+            <span class="summary-amount">{content.offerFreeLabel}</span>
+          </>
+        )}
+      </p>
+    );
+  })}
+</div>
+
+<!-- The amount paid at the door -->
+<div class="cod-total">
+  <span class="cod-total-label">{content.totalLabel}</span>
+  <span id="summary-total" class="price num">{formatCurrency(basePrice, cur)}</span>
+</div>
+
+<style>
+  .summary { display: grid; gap: 0.5rem; padding-top: 1rem; border-top: 1px dashed var(--clr-border-strong); font-size: var(--text-sm); }
+  .summary-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; color: var(--clr-ink); }
+  .summary-line.hidden { display: none; }
+  .summary-line[hidden] { display: none; }
+  .summary-name { display: flex; gap: 0.375rem; min-width: 0; }
+  .summary-amount { flex: none; font-weight: 600; white-space: nowrap; }
+  .summary-amount.is-quiet { color: var(--clr-muted); font-weight: 500; }
+  .summary-line.is-good { color: var(--clr-success); }
+  .cod-total-label { font-weight: 600; }
+</style>

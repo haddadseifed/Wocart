@@ -1,0 +1,193 @@
+---
+// Writing a review, in two steps a shopper on a phone can finish quickly:
+// find the order (its number and the phone it was placed with), then rate,
+// write — or speak — and add photos. Each photo and the voice note are sent
+// the moment they are added, so submitting waits for nothing. Rendered with
+// the product page (cached), not in the reviews island: it needs no request
+// data, and its text would not fit an island's URL. The behaviour is
+// `scripts/review-form.ts`; everything a shopper reads is rendered here.
+import { Icon } from "astro-icon/components";
+import { REVIEW_TEXT_LIMITS } from "@wocart/storefront";
+import { message, messageData } from "@/theme/content/messages";
+import type { StoreFrontContent } from "@/theme/content";
+
+interface Props {
+  productId: string;
+  content: StoreFrontContent;
+}
+
+const { productId, content: c } = Astro.props;
+const locale = Astro.locals.store.locale;
+
+const copy = JSON.stringify({
+  errorGeneric: c.reviewFormErrorGeneric,
+  errorInvalidOrder: c.reviewFormErrorInvalidOrder,
+  errorNotDelivered: c.reviewFormErrorNotDelivered,
+  errorRateLimited: c.reviewFormErrorRateLimited,
+  errorDuplicate: c.reviewFormErrorDuplicate,
+  errorFileType: c.reviewFormErrorFileType,
+  errorFileTooLarge: c.reviewFormErrorFileTooLarge,
+  errorOrderFormat: c.reviewFormErrorOrderFormat,
+  errorDisabled: c.reviewFormErrorDisabled,
+  errorProduct: c.reviewFormErrorProduct,
+  errorGrant: c.reviewFormErrorGrant,
+  errorUploadMissing: c.reviewFormErrorUploadMissing,
+  errorMediaLimit: c.reviewFormErrorMediaLimit,
+  minLength: c.reviewFormMinLengthError,
+  ratingRequired: c.reviewFormRatingRequired,
+  nothingLeft: c.reviewFormNothingLeft,
+  waitUploads: c.reviewFormWaitUploads,
+  voiceDenied: c.reviewFormVoiceDenied,
+  bodyHint: c.reviewFormBodyPlaceholder,
+  bodyVoiceHint: c.reviewFormBodyVoiceHint,
+  sending: c.reviewFormSending,
+  notSent: c.reviewFormNotSent,
+  alreadyReviewed: c.reviewFormAlreadyReviewed,
+  successPublished: c.reviewFormSuccessPublished,
+  successPending: c.reviewFormSuccess,
+  recording: c.reviewFormVoiceRecording,
+  voiceLabel: c.reviewFormVoiceLabel,
+});
+---
+
+<section
+  class="review-form-section"
+  id="write-review"
+  data-review-form
+  data-product-id={productId}
+  data-copy={copy}
+  data-order-found={messageData(c, "reviewFormOrderFound")}
+  data-photos-hint={messageData(c, "reviewFormPhotosHint")}
+  data-voice-hint={messageData(c, "reviewFormVoiceHint")}
+  data-too-many={messageData(c, "reviewFormErrorTooManyPhotos")}
+>
+  <div class="carton overflow-hidden">
+    <div class="border-b border-border px-5 py-4 sm:px-6">
+      <h2 class="text-lg font-bold text-ink">{c.reviewFormTitle}</h2>
+      <p class="mt-1 text-sm text-ink-2">{c.reviewFormIntro}</p>
+    </div>
+
+    <div data-review-success hidden class="px-6 py-10 text-center" role="status">
+      <Icon name="heroicons:check-circle" class="mx-auto mb-3 h-10 w-10 text-success" aria-hidden="true" />
+      <p class="text-base font-bold text-ink" data-success-text></p>
+    </div>
+
+    <div class="px-5 pt-5 sm:px-6" data-review-error-wrap hidden>
+      <div role="alert" class="flex items-start gap-3 rounded-[var(--radius-input)] border border-error bg-surface p-3 text-sm font-semibold text-error">
+        <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 shrink-0" aria-hidden="true" />
+        <p data-review-error></p>
+      </div>
+    </div>
+
+    <!-- Step 1: find the order -->
+    <form class="space-y-4 p-5 sm:p-6" data-review-find novalidate>
+      <div>
+        <label for="review-order-number" class="form-label">{c.reviewFormOrderLabel}</label>
+        <input id="review-order-number" name="orderNumber" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder={c.reviewFormOrderPlaceholder} class="form-input" dir="ltr" />
+        <p class="mt-1.5 text-xs text-ink-2">{c.reviewFormOrderHelp}</p>
+      </div>
+      <div>
+        <label for="review-phone" class="form-label">{c.reviewFormPhoneLabel}</label>
+        <input id="review-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" placeholder={c.reviewFormPhonePlaceholder} class="form-input" dir="ltr" />
+        <p class="mt-1.5 text-xs text-ink-2">{c.reviewFormPhoneHelp}</p>
+      </div>
+      <button type="submit" class="btn-primary" data-find-button>{c.reviewFormFind}</button>
+    </form>
+
+    <!-- Step 2: write the review -->
+    <form class="space-y-5 p-5 sm:p-6" data-review-write hidden novalidate>
+      <p class="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span class="font-semibold text-ink" dir="auto" data-order-label></span>
+        <button type="button" class="text-xs font-semibold text-ink-2 underline underline-offset-4" data-change-order>{c.reviewFormChangeOrder}</button>
+      </p>
+
+      <fieldset data-product-choice hidden>
+        <legend class="form-label">{c.reviewFormProductLabel}</legend>
+        <div class="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2" data-products></div>
+      </fieldset>
+
+      <div>
+        <span class="form-label block" id="review-rating-label">{c.reviewFormRatingLabel}</span>
+        <div class="mt-1 flex gap-2" role="radiogroup" aria-labelledby="review-rating-label" data-stars>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button type="button" role="radio" aria-checked="false" data-star={n} aria-label={message(c, "ariaStarRating", { count: n }, locale)} class="star-btn flex h-11 w-11 items-center justify-center rounded-[var(--radius-input)] border border-border bg-surface transition-colors">
+              <Icon name="heroicons:star-solid" class="star-icon h-6 w-6 text-border transition-colors" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label for="review-title" class="form-label">{c.reviewFormTitleLabel}</label>
+        <input id="review-title" name="title" type="text" maxlength={REVIEW_TEXT_LIMITS.titleMax} placeholder={c.reviewFormTitlePlaceholder} class="form-input" dir="auto" />
+      </div>
+
+      <div>
+        <label for="review-body" class="form-label">{c.reviewFormBodyLabel}</label>
+        <textarea id="review-body" name="body" rows="4" maxlength={REVIEW_TEXT_LIMITS.bodyMax} class="form-input" dir="auto" placeholder={c.reviewFormBodyPlaceholder}></textarea>
+        <p class="mt-1.5 text-xs text-ink-2" data-body-hint hidden>{c.reviewFormBodyVoiceHint}</p>
+      </div>
+
+      <div data-voice-block hidden>
+        <span class="form-label block">{c.reviewFormVoiceLabel}</span>
+        <p class="text-xs text-ink-2" data-voice-limit></p>
+        <div class="mt-2 flex flex-wrap items-center gap-2" data-voice-controls>
+          <button type="button" class="btn-secondary !w-auto" data-voice-record hidden>
+            <Icon name="heroicons:microphone" class="h-4 w-4" aria-hidden="true" />
+            {c.reviewFormVoiceRecord}
+          </button>
+          <button type="button" class="btn-secondary !w-auto" data-voice-stop hidden>
+            <Icon name="heroicons:stop" class="h-4 w-4" aria-hidden="true" />
+            {c.reviewFormVoiceStop}
+            <span class="num" data-voice-timer dir="ltr"></span>
+          </button>
+          <label class="btn-secondary !w-auto cursor-pointer" data-voice-attach>
+            <Icon name="heroicons:paper-clip" class="h-4 w-4" aria-hidden="true" />
+            {c.reviewFormVoiceAttach}
+            <input type="file" accept="audio/*,.opus,.ogg,.m4a,.mp3" class="sr-only" data-voice-file />
+          </label>
+        </div>
+        <ul class="mt-2" data-voice-list></ul>
+      </div>
+
+      <div data-photos-block hidden>
+        <span class="form-label block">{c.reviewFormPhotosLabel}</span>
+        <p class="text-xs text-ink-2" data-photos-limit></p>
+        <ul class="mt-2 flex flex-wrap gap-2" data-photo-list></ul>
+        <label class="btn-secondary mt-2 !w-auto cursor-pointer" data-photos-add>
+          <Icon name="heroicons:camera" class="h-4 w-4" aria-hidden="true" />
+          {c.reviewFormPhotosAdd}
+          <input type="file" accept="image/*" multiple class="sr-only" data-photo-file />
+        </label>
+      </div>
+
+      <button type="submit" class="btn-primary" data-submit-button>{c.reviewFormSubmit}</button>
+    </form>
+
+    <template data-product-option>
+      <label class="flex cursor-pointer items-center gap-3 rounded-[var(--radius-input)] border border-border bg-surface p-2.5 has-[:checked]:border-ink has-[:disabled]:opacity-50">
+        <input type="radio" name="productId" class="sr-only" />
+        <img alt="" class="h-11 w-11 shrink-0 rounded-[var(--radius-input)] bg-plate object-cover" loading="lazy" decoding="async" width="44" height="44" hidden />
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-sm font-semibold text-ink" dir="auto" data-name></span>
+          <span class="block text-xs text-ink-2" data-reviewed hidden>{c.reviewFormAlreadyReviewed}</span>
+        </span>
+      </label>
+    </template>
+
+    <template data-file-item>
+      <li class="relative flex items-center gap-2 overflow-hidden rounded-[var(--radius-input)] border border-border bg-surface">
+        <img alt="" class="h-16 w-16 object-cover" hidden />
+        <audio controls preload="metadata" class="h-10 max-w-[14rem]" hidden></audio>
+        <span class="px-2 text-xs text-ink-2" data-status role="status"></span>
+        <span class="absolute inset-x-0 bottom-0 h-1 bg-plate"><span class="block h-full bg-ink transition-[inline-size]" style="inline-size: 0%" data-progress></span></span>
+        <button type="button" class="px-2 text-xs font-semibold underline underline-offset-4" data-retry hidden>{c.reviewFormRetryFile}</button>
+        <button type="button" class="px-2 text-xs font-semibold text-error" data-remove>{c.reviewFormRemoveFile}</button>
+      </li>
+    </template>
+  </div>
+</section>
+
+<script>
+  import "@/theme/scripts/review-form";
+</script>

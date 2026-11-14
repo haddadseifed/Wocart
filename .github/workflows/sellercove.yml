@@ -1,0 +1,41 @@
+name: SellerCove theme CI
+
+on:
+  push:
+    branches: [feat/sellercove-storefront]
+    paths:
+      - "cod-astro/sellercove/**"
+      - ".github/workflows/sellercove.yml"
+  pull_request:
+    paths:
+      - "cod-astro/sellercove/**"
+      - ".github/workflows/sellercove.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sellercove-theme-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  storefront:
+    name: SellerCove storefront (tests + check + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: cod-astro/sellercove/package-lock.json
+      - run: npm ci
+        working-directory: cod-astro/sellercove
+      - run: npm test
+        working-directory: cod-astro/sellercove
+      - run: npm run validate:all
+        working-directory: cod-astro/sellercove
+      - run: npx astro check
+        working-directory: cod-astro/sellercove
+      - run: npm run build
+        working-directory: cod-astro/sellercove

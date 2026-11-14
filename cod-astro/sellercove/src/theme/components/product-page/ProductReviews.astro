@@ -1,0 +1,146 @@
+---
+// The product's reviews under one title: the summary and the reviews
+// themselves stream in (a server island), so the cached page never waits for
+// them; in a preview they render inline. The form to add one opens in a
+// dialog from a button beside the title, and closing it (its button, Escape or
+// a tap outside) returns to that button. Until the first review arrives, a line
+// says so and invites the shopper who received it. Shown only when the store
+// takes reviews.
+import type { InferProps } from "@wocart/theme";
+import type { Product } from "@wocart/storefront";
+import { Icon } from "astro-icon/components";
+import Section from "@/theme/components/ui/Section.astro";
+import ReviewsIsland from "@/theme/components/product/ReviewsIsland.astro";
+import ReviewForm from "@/theme/components/product/ReviewForm.astro";
+import { reviewsIslandCopy } from "@/theme/bridges/island-props";
+import type { StoreFrontContent } from "@/theme/content";
+import type { productReviews } from "@/theme/catalog/product/product-sections.def";
+
+type Props = InferProps<typeof productReviews> & { product: Product | null; content: StoreFrontContent; inline?: boolean };
+const { product, content, showForm, scheme, style, inline = false } = Astro.props;
+const { config } = Astro.locals.store;
+const hasReviews = (product?.reviewStats?.reviewCount ?? 0) > 0;
+---
+
+{product && config.reviewsEnabled && (
+  <Section scheme={scheme} style={style} id="reviews">
+    <div class="reviews-head">
+      <h2 class="section-title">{content.reviewsTitle}</h2>
+      {showForm && (
+        <button type="button" class="btn-secondary btn-auto review-open" data-review-open aria-haspopup="dialog">
+          <Icon name="heroicons:chat-bubble-left-ellipsis" aria-hidden="true" />
+          {content.reviewFormTitle}
+        </button>
+      )}
+    </div>
+    {showForm && (
+      <dialog class="review-dialog" data-review-dialog aria-label={content.reviewFormTitle}>
+        <button type="button" class="review-dialog-close" data-review-close aria-label={content.reviewFormClose}>
+          <Icon name="heroicons:x-mark" aria-hidden="true" />
+        </button>
+        <ReviewForm productId={product.id} content={content} />
+      </dialog>
+    )}
+    {hasReviews && inline && (
+      <ReviewsIsland productId={product.id} copy={reviewsIslandCopy(content)} stats={product.reviewStats} />
+    )}
+    {hasReviews && !inline ? (
+      <ReviewsIsland productId={product.id} copy={reviewsIslandCopy(content)} stats={product.reviewStats} server:defer>
+        <div slot="fallback" class="reviews-wait" aria-hidden="true">
+          <div class="wait-card is-short"></div>
+          <div class="wait-card"></div>
+        </div>
+      </ReviewsIsland>
+    ) : null}
+    {!hasReviews && (
+      <div class="reviews-empty">
+        <p class="reviews-empty-stars" aria-hidden="true">
+          {[1, 2, 3, 4, 5].map(() => <Icon name="heroicons:star" />)}
+        </p>
+        <p>{content.reviewsEmpty}</p>
+      </div>
+    )}
+  </Section>
+)}
+
+<style>
+  .reviews-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+  .review-open { gap: 0.5rem; }
+  .review-open :global(svg) { width: 1.125rem; height: 1.125rem; }
+  .review-dialog {
+    width: min(40rem, calc(100vw - 1.5rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: var(--radius-panel);
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    box-shadow: var(--shadow-lg);
+  }
+  .review-dialog::backdrop { background: color-mix(in oklab, var(--clr-ink) 55%, transparent); }
+  .review-dialog-close {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 1;
+    float: inline-end;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0.75rem 0.75rem -3.5rem;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-round);
+    background: var(--clr-surface);
+    color: var(--clr-ink);
+    cursor: pointer;
+  }
+  .review-dialog :global(.review-form-section h2) { padding-inline-end: 3rem; }
+  .review-dialog-close:focus-visible { outline: 2px solid var(--clr-ink); outline-offset: 2px; }
+  .review-dialog-close :global(svg) { width: 1.25rem; height: 1.25rem; }
+  .reviews-empty {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1.5rem;
+    border: 1px dashed var(--clr-border);
+    border-radius: var(--radius-panel);
+    color: var(--clr-text);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+  .reviews-empty-stars { display: flex; gap: 0.25rem; color: var(--clr-rating); }
+  .reviews-empty-stars :global(svg) { width: 1.25rem; height: 1.25rem; }
+  .reviews-wait { display: grid; gap: 0.75rem; }
+  .wait-card { height: 8rem; border-radius: var(--radius-panel); background: var(--clr-plate); animation: wait 1.4s ease-in-out infinite; }
+  .wait-card.is-short { height: 5rem; }
+  @keyframes wait { 50% { opacity: 0.55; } }
+  @media (prefers-reduced-motion: reduce) { .wait-card { animation: none; } }
+</style>
+
+<script>
+  import { bindEach } from "@wocart/theme/lifecycle";
+
+  bindEach<HTMLDialogElement>("[data-review-dialog]", (dialog) => {
+    const opener = dialog.closest("section")?.querySelector<HTMLButtonElement>("[data-review-open]");
+    const open = () => dialog.showModal();
+    const close = () => dialog.close();
+    const outside = (event: MouseEvent) => {
+      if (event.target === dialog) dialog.close();
+    };
+    const back = () => opener?.focus();
+    const closer = dialog.querySelector("[data-review-close]");
+    opener?.addEventListener("click", open);
+    closer?.addEventListener("click", close);
+    dialog.addEventListener("click", outside);
+    dialog.addEventListener("close", back);
+    return () => {
+      opener?.removeEventListener("click", open);
+      closer?.removeEventListener("click", close);
+      dialog.removeEventListener("click", outside);
+      dialog.removeEventListener("close", back);
+    };
+  });
+</script>

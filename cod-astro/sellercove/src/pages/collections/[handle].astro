@@ -1,0 +1,29 @@
+---
+// A collection's page: the listing template (`theme/pages/SurfacePage.astro`)
+// over the store's saved collection document, or the theme's default.
+import { notFound } from "@wocart/storefront/astro";
+import { createReadCache } from "@wocart/theme/astro";
+import SurfacePage from "@/theme/pages/SurfacePage.astro";
+import { listingCatalog } from "@/theme/catalog/families/listing";
+import { collectionByHandle } from "@/theme/catalog/listing/listing-main.def";
+import { message } from "@/theme/content/messages";
+
+const { handle } = Astro.params;
+const { config, content, locale, client } = Astro.locals.store;
+
+// The collection first: an unknown handle is a real 404, never an empty 200.
+const [collection, saved] = await Promise.all([client.collections.get(handle!), client.pageData.get("collection")]);
+if (!collection) return notFound(Astro);
+const reads = createReadCache();
+reads.get(collectionByHandle(collection.handle), async () => collection);
+---
+
+<SurfacePage
+  theme={listingCatalog}
+  surface="collection"
+  document={saved}
+  params={{ handle: collection.handle, page: Astro.url.searchParams.get("page") ?? undefined, sort: Astro.url.searchParams.get("sort") ?? undefined }}
+  reads={reads}
+  title={message(content, "collectionPageTitle", { collection: collection.title, storeName: config.name }, locale)}
+  description={collection.description ?? undefined}
+/>

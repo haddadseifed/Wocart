@@ -1,0 +1,136 @@
+---
+// The store's categories as tall photo tiles, each named on a white chip; a
+// last tile leads to every product. A row a phone swipes, a grid on a wide
+// screen. A category without a photo of its own shows one of its products.
+import { message } from "@/theme/content/messages";
+import { Image } from "astro:assets";
+import type { Category, ProductList } from "@wocart/storefront";
+import { storefrontPath } from "@wocart/storefront";
+import type { InferProps } from "@wocart/theme";
+import { isPreview, type BlocksHandle } from "@wocart/theme/astro";
+import { Icon } from "astro-icon/components";
+import type { StoreFrontContent } from "@/theme/content";
+import type { categoryCards } from "@/theme/catalog/home/category-cards.def";
+import Section from "@/theme/components/ui/Section.astro";
+import SectionHead from "@/theme/components/ui/SectionHead.astro";
+
+type Props = InferProps<typeof categoryCards> & {
+  blocks: BlocksHandle;
+  categories: Category[];
+  /** The catalog, shared with the other sections: a category with no photo of its own shows one of its products. */
+  products?: ProductList[];
+  content: StoreFrontContent;
+};
+
+const { blocks, categories, products = [], content, limit, showAll, headingAlign, scheme, style } = Astro.props;
+const store = Astro.locals.store;
+
+const photoFor = (category: Category) =>
+  category.image?.url ?? products.find((product) => product.categoryId === category.id && product.coverImage)?.coverImage?.url ?? null;
+
+// A copy: the page shares this array with other sections, so sorting in place
+// would reorder their reads too.
+const shown = [...categories].sort((a, b) => a.position - b.position).slice(0, limit);
+const tiles = shown.length + (showAll ? 1 : 0);
+---
+
+{(shown.length > 0 || isPreview(blocks)) && (
+  <Section scheme={scheme} style={style}>
+    <SectionHead title={content.categoriesSection} center={headingAlign === "center"} />
+    <ul class="category-tiles swipe-row" style={`--tiles: ${Math.min(tiles, 5)}`}>
+      {shown.map((category) => {
+        const photo = photoFor(category);
+        return (
+          <li>
+            <a
+              href={store.href(storefrontPath("category", { slug: category.slug }))}
+              class="category-tile plate"
+              aria-label={message(content, "ariaBrowseCategoryProducts", { category: category.name }, store.locale)}
+            >
+              {photo ? (
+                <Image src={photo} alt="" width={600} height={750} widths={[300, 450, 600]} sizes="(min-width: 1024px) 18vw, 62vw" quality={82} loading="lazy" decoding="async" />
+              ) : (
+                <span class="category-initial" aria-hidden="true">{category.name.charAt(0)}</span>
+              )}
+              <span class="category-chip">{category.name}</span>
+            </a>
+          </li>
+        );
+      })}
+      {showAll && (
+        <li>
+          <a href={store.href(storefrontPath("catalog"))} class="category-tile category-all">
+            <span class="category-all-name">{content.allProductsSection}</span>
+            <span class="category-all-go" aria-hidden="true"><Icon name="heroicons:arrow-up-left" /></span>
+          </a>
+        </li>
+      )}
+    </ul>
+  </Section>
+)}
+
+<style>
+  .category-tiles { grid-auto-columns: 62%; list-style: none; }
+  @media (min-width: 640px) { .category-tiles { grid-auto-columns: 36%; } }
+  @media (min-width: 1024px) {
+    .category-tiles {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(var(--tiles), minmax(0, 1fr));
+      gap: 1.25rem;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+    }
+  }
+  .category-tile { display: block; aspect-ratio: 4 / 5; color: var(--clr-ink); text-decoration: none; }
+  .category-tile :global(img) { transition: transform 0.8s var(--ease-out-expo); }
+  @media (hover: hover) { .category-tile:hover :global(img) { transform: scale(1.05); } }
+  .category-initial {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: var(--text-5xl);
+    color: var(--clr-muted);
+  }
+  .category-chip {
+    position: absolute;
+    inset-inline-start: 0.875rem;
+    bottom: 0.875rem;
+    max-width: calc(100% - 1.75rem);
+    padding: 0.5rem 1rem;
+    overflow: hidden;
+    border-radius: var(--radius-tag);
+    background: var(--clr-bg);
+    box-shadow: var(--shadow-md);
+    color: var(--clr-ink);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .category-all {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.375rem;
+    border: 1px solid var(--clr-ink);
+    border-radius: var(--radius-media);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .category-all:hover { background: var(--clr-ink); color: var(--clr-bg); }
+  .category-all-name { font-family: var(--font-heading); font-size: var(--text-2xl); line-height: 1.35; }
+  .category-all-go {
+    display: inline-flex;
+    width: 3.5rem;
+    height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--clr-current);
+    border-radius: var(--radius-round);
+  }
+  .category-all-go :global(svg) { width: 1.375rem; height: 1.375rem; }
+  :global([dir="ltr"]) .category-all-go :global(svg) { transform: scaleX(-1); }
+</style>

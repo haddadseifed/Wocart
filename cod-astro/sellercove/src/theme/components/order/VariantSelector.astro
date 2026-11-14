@@ -1,0 +1,76 @@
+---
+/**
+ * The option buttons of a product without offers. They open on the SDK's
+ * `defaultVariant` — a variant that exists and can be sold — and each value
+ * carries its state for the other choices: available, sold out, or not made.
+ * The browser half is `scripts/product.ts`, which moves the selection with
+ * the SDK's `pickOption`.
+ */
+import { getProductView, optionStates, type ProductDetail } from "@wocart/storefront";
+import { safeHex } from "@/theme/utils/brand";
+
+interface Props {
+  product: ProductDetail;
+}
+
+const { product } = Astro.props;
+const selection = getProductView(product).defaultVariant?.variations ?? {};
+const states = optionStates(product, selection);
+---
+
+{product.hasVariants && product.variantOptions && product.variants.length > 0 && (
+  <div class="space-y-4">
+    {product.variantOptions.map((opt) => (
+      <div class="space-y-2">
+        <span class="option-name">{opt.name}</span>
+        <div class="option-values">
+          {opt.values.map((val) => {
+            const selected = selection[opt.name] === val.value;
+            return (
+              <button
+                type="button"
+                class:list={["variant-opt", selected && "is-selected"]}
+                data-option={opt.name}
+                data-value={val.value}
+                data-state={states[opt.name]?.[val.value]}
+                aria-pressed={selected ? "true" : "false"}
+              >
+                {val.hexColor && (
+                  <span class="swatch" style={`background: ${safeHex(val.hexColor, "transparent")}`}></span>
+                )}
+                <span>{val.value}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
+<style>
+  .option-name { display: block; margin-bottom: 0.625rem; color: var(--clr-muted); font-size: var(--text-sm); }
+  .option-values { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .variant-opt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    border: 1px solid var(--clr-border-strong);
+    border-radius: var(--radius-tag);
+    background: var(--clr-field);
+    color: var(--clr-ink);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .variant-opt:has(.swatch) { padding-inline-start: 0.375rem; }
+  .variant-opt:hover { border-color: var(--clr-ink); }
+  .variant-opt:focus-visible { outline: 2px solid var(--clr-ink); outline-offset: 2px; }
+  .variant-opt.is-selected { border-color: var(--clr-ink); box-shadow: inset 0 0 0 1px var(--clr-ink); font-weight: 600; }
+  .variant-opt[data-state="sold_out"] { color: var(--clr-muted); text-decoration: line-through; }
+  .variant-opt[data-state="unavailable"] { color: var(--clr-muted); border-style: dashed; }
+  .swatch { width: 1.875rem; height: 1.875rem; border-radius: var(--radius-round); box-shadow: inset 0 0 0 1px color-mix(in oklab, black 12%, transparent); flex: none; }
+</style>

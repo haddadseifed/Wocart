@@ -1,0 +1,45 @@
+/**
+ * French (fr) - misc.
+ */
+
+import type { MiscStrings } from "../types/misc";
+
+export const frMisc: MiscStrings = {
+  required: "*",
+  featured: "Vedette",
+  lowStock_one: "Dernière pièce",
+  lowStock_many: "Dernières {count} pièces",
+  lowStock_other: "Dernières {count} pièces",
+  outOfStock: "Rupture de stock",
+  qtyMaxStock_one: "Plus qu'une pièce",
+  qtyMaxStock_many: "Plus que {count} de pièces",
+  qtyMaxStock_other: "Plus que {count} pièces",
+  searchLabel: "Recherche...",
+  noResultsLabel: "Aucun résultat correspondant",
+  loadMoreLabel: "Voir plus",
+  allLabel: "Tout",
+  pagerPrevious: "Précédent",
+  pagerNext: "Suivant",
+  pagerLabel: "Navigation entre les pages",
+  pagerPageOf: "Page {page} sur {pages}",
+  reviewFormMinLengthError: "Écrivez au moins 10 caractères, ou ajoutez une note vocale",
+  reviewFormRatingRequired: "Veuillez choisir une évaluation de 1 à 5 étoiles",
+  offerSavingsText: "Économie de {amount}\u00A0{currency}",
+  offerUnitLabel: "Unité {n}",
+  ariaMainNavigation: "Navigation principale",
+  ariaLanguageSwitcher: "Langue",
+  ariaQuantity: "Quantité",
+  ariaGoToImage: "Aller à l'image {n} sur {total}",
+  ariaBrowseAllProducts: "Parcourir tous les produits",
+  ariaBrowseCategoryProducts: "Parcourir les produits {category}",
+  ariaProductCard: "{name} - {price}{currency}",
+  ariaProductCardAction: "{card}, {action}",
+  ariaStarRating_one: "{count} étoile",
+  ariaStarRating_many: "{count} d'étoiles",
+  ariaStarRating_other: "{count} étoiles",
+  thankYouPageTitle: "Commande reçue",
+  defaultMetaDescription: "Découvrez {storeName} : des produits utiles, des informations claires et une commande simple",
+  productPageTitle: "{product} - {storeName}",
+  collectionPageTitle: "{collection} - {storeName}",
+  documentTitle: "{title} - {storeName}",
+};

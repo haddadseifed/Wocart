@@ -1,0 +1,34 @@
+---
+// A text page of the store — terms, privacy, refunds, delivery, or a page of
+// its own: the text-page template (`theme/pages/SurfacePage.astro`) over the
+// store's saved page document, or the theme's default. Draft, archived and
+// unknown slugs are a real 404, never a soft 200. The body arrives already
+// sanitised by the platform and is rendered as given (`PageMain.astro`).
+import { notFound } from "@wocart/storefront/astro";
+import { createReadCache } from "@wocart/theme/astro";
+import SurfacePage from "@/theme/pages/SurfacePage.astro";
+import { pageCatalog } from "@/theme/catalog/families/page";
+import { pageBySlug } from "@/theme/catalog/listing/page-main.def";
+import { message } from "@/theme/content/messages";
+
+const { slug } = Astro.params;
+const { config, content, locale, client } = Astro.locals.store;
+
+const [page, saved] = await Promise.all([client.pages.get(slug ?? ""), client.pageData.get("page")]);
+if (!page) return notFound(Astro);
+const reads = createReadCache();
+reads.get(pageBySlug(page.slug), async () => page);
+
+/** Cosmetic only — bodyHtml is already sanitised, so a tag strip here is safe. */
+const plain = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+---
+
+<SurfacePage
+  theme={pageCatalog}
+  surface="page"
+  document={saved}
+  params={{ slug: page.slug }}
+  reads={reads}
+  title={page.metaTitle ?? message(content, "documentTitle", { title: page.title, storeName: config.name }, locale)}
+  description={page.metaDescription ?? plain(page.bodyHtml).slice(0, 160)}
+/>

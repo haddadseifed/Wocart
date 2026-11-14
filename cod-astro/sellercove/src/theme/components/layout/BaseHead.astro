@@ -1,0 +1,118 @@
+---
+// ClientRouter swaps pages without reloading the document. A page opts out with
+// softNavigation={false} when a widget in it must start from a fresh document
+// (Turnstile renders once per document); a router-less page is always reached by
+// a full load. The release pipeline sets and verifies a JavaScript Content-Type on
+// every module chunk, so scripts loaded by a soft navigation pass the strict MIME check.
+
+import type { StoreConfig } from "@wocart/storefront";
+import { trackingHead } from "@wocart/storefront/astro";
+import { Font } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
+import { openGraphLocale } from "@/theme/utils/seo";
+import ThemeStyles from "@wocart/theme/astro/ThemeStyles.astro";
+import type { ColorScheme } from "@wocart/theme";
+import type { ThemeFont } from "@/theme/appearance";
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage: string;
+  noindex?: boolean;
+  config: StoreConfig;
+  /** The language the page is rendered in. */
+  locale: string;
+  /** This page's own absolute URL, in its language. */
+  canonical: string;
+  /** Its other language versions (`hreflang`), empty while the store serves one language. */
+  alternates: { hreflang: string; href: string }[];
+  /** The store's color schemes, written into the page as the classes sections wear. */
+  schemes: readonly ColorScheme[];
+  /** The browser's own chrome color: the page scheme's background. */
+  themeColor: string;
+  /** The faces for text and headings: fonts self-hosted with the theme. */
+  fonts: { body: ThemeFont; heading: ThemeFont };
+  /** The corners setting's radii. */
+  radii: Readonly<Record<"media" | "panel" | "input" | "button" | "tag", string>>;
+  /** The page's script: only that subset of the theme face is preloaded. */
+  isRTL: boolean;
+  /** Client-side navigation to and from this page. */
+  softNavigation?: boolean;
+  /** The page's LCP images (landing page stack top) — preloaded in <head>
+   *  so their fetch starts before the parser reaches the <img> tags. */
+  preloadImages?: string[];
+}
+
+const { title, description, ogImage, noindex, config, locale, canonical, alternates, schemes, themeColor, fonts, radii, isRTL, preloadImages, softNavigation = true } = Astro.props;
+const subset = isRTL ? "arabic" : "latin";
+
+---
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="generator" content={Astro.generator} />
+  <meta name="theme-color" content={themeColor} />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  {softNavigation && <ClientRouter />}
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+  <!-- SEO -->
+  <link rel="canonical" href={canonical} />
+  {alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
+  <meta name="author" content={config.name} />
+
+  <!-- OG -->
+  <meta property="og:title" content={title} />
+  <meta property="og:site_name" content={config.name} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:description" content={description} />
+  {ogImage && <meta property="og:image" content={ogImage} />}
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content={openGraphLocale(locale)} />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+  <!-- Fonts: self-hosted by Astro, served from the store's own domain. Only the
+       chosen faces are declared on the page, and their script's subset is preloaded. -->
+  <Font cssVariable={fonts.body.cssVariable} preload={[{ subset }]} />
+  {fonts.heading.cssVariable !== fonts.body.cssVariable && <Font cssVariable={fonts.heading.cssVariable} preload={[{ subset }]} />}
+
+  {/* The color schemes of the store; the style classes ship inside the theme stylesheet. */}
+  <ThemeStyles schemes={schemes} stylesheet={false} />
+
+  <!-- The store's media — early connection for product images -->
+  <link rel="preconnect" href={new URL(config.media.origin).origin} />
+
+  <!-- LCP image preload — starts the first stack images' fetches from the
+       head (fetchpriority on the img alone waits for the parser to reach it).
+       Only the first is high priority: preloading deep stack images would
+       compete with the LCP for mobile bandwidth. -->
+  {preloadImages?.slice(0, 2).map((src, i) => (
+    <link rel="preload" as="image" href={src} fetchpriority={i === 0 ? "high" : undefined} />
+  ))}
+
+  <!-- The page's pixel and Meta's library: the SDK's start() reports the page. -->
+  <Fragment set:html={trackingHead(config.pixelId)} />
+
+  {/* The faces and corners of the store; `html:root` outranks the defaults of the stylesheet. */}
+  <style set:html={`
+    html:root {
+      --font-text: var(${fonts.body.cssVariable});
+      --font-display: var(${fonts.heading.cssVariable});
+      --r-media: ${radii.media};
+      --r-panel: ${radii.panel};
+      --r-input: ${radii.input};
+      --r-button: ${radii.button};
+      --r-tag: ${radii.tag};
+    }
+  `} />
+</head>

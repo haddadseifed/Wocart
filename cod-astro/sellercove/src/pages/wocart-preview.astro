@@ -1,0 +1,79 @@
+---
+// An editor's preview (`THEME_PREVIEW_PATH`): a surface as the draft would
+// leave it, in the frame of the editor the verified token names. The
+// middleware read the request and built the draft's store context; nothing
+// here is stored, cached or indexed (no route rule may cache this path).
+//
+// What it shows is the SDK's `previewTarget`: a template previews the
+// resource the draft's `path` names, else the store's first of its kind (or
+// renders empty, so its sections can still be arranged); an area previews on
+// the page its `path` names, else the home page, with only its own sections
+// marked. Without a verified preview, or for a surface this theme does not
+// compose, the route is a 404.
+import { createReadCache, previewTarget } from "@wocart/theme/astro";
+import HomeSurface from "@/theme/pages/HomeSurface.astro";
+import ProductSurface from "@/theme/pages/ProductSurface.astro";
+import SurfacePage from "@/theme/pages/SurfacePage.astro";
+import { listingCatalog } from "@/theme/catalog/families/listing";
+import { pageCatalog } from "@/theme/catalog/families/page";
+import { thankYouCatalog } from "@/theme/catalog/families/thank-you";
+import { searchCatalog } from "@/theme/catalog/families/search";
+import { trackOrderCatalog } from "@/theme/catalog/families/track-order";
+import { checkoutCatalog } from "@/theme/catalog/families/checkout";
+import { contactCatalog } from "@/theme/catalog/families/contact";
+import LandingSurface from "@/theme/pages/LandingSurface.astro";
+import PreviewBridge from "@/theme/components/preview/PreviewBridge.astro";
+import { previewResponseHeaders } from "@/theme/sdk";
+import { theme00 } from "@/theme/theme";
+
+export const prerender = false;
+
+const notFound = () => new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+const preview = Astro.locals.preview;
+if (preview === undefined) return notFound();
+const { client } = Astro.locals.store;
+const target = await previewTarget(theme00, preview.draft, client);
+// The page types this theme composes with one catalog of their own, by the surface each renders.
+const SURFACE_PAGES = {
+  collection: { theme: listingCatalog, surface: "collection" },
+  category: { theme: listingCatalog, surface: "category" },
+  catalog: { theme: listingCatalog, surface: "catalog" },
+  page: { theme: pageCatalog, surface: "page" },
+  thankYou: { theme: thankYouCatalog, surface: "thank-you" },
+  search: { theme: searchCatalog, surface: "search" },
+  trackOrder: { theme: trackOrderCatalog, surface: "track-order" },
+  checkout: { theme: checkoutCatalog, surface: "checkout" },
+  contact: { theme: contactCatalog, surface: "contact" },
+} as const;
+const shown = target?.pageType;
+const surfacePage = shown !== undefined && shown in SURFACE_PAGES ? SURFACE_PAGES[shown as keyof typeof SURFACE_PAGES] : null;
+if (target === null || (shown !== "home" && shown !== "product" && shown !== "landing" && surfacePage === null)) return notFound();
+const product = shown === "product" && target.params.handle ? await client.products.get(target.params.handle) : null;
+// A landing page previews as a draft too, and its preview counts no visit.
+const landing = shown === "landing" && target.params.slug ? await client.pages.landing(target.params.slug, { preview: true }) : null;
+if (shown === "landing" && landing === null) return notFound();
+
+for (const [name, value] of Object.entries(previewResponseHeaders(preview.claims))) {
+  Astro.response.headers.set(name, value);
+}
+const { document, params } = target;
+const isArea = target.area !== null;
+---
+
+{landing !== null ? (
+  <LandingSurface landing={landing} document={isArea ? landing.document : document} preview={!isArea} area={target.area} softNavigation={false}>
+    <PreviewBridge editor={preview.claims.editor} token={preview.token} />
+  </LandingSurface>
+) : shown === "product" ? (
+  <ProductSurface product={product} document={document} preview={!isArea} softNavigation={false}>
+    <PreviewBridge editor={preview.claims.editor} token={preview.token} />
+  </ProductSurface>
+) : shown === "home" ? (
+  <HomeSurface document={document} preview={!isArea}>
+    <PreviewBridge editor={preview.claims.editor} token={preview.token} />
+  </HomeSurface>
+) : (
+  <SurfacePage theme={surfacePage!.theme} surface={surfacePage!.surface} document={document} params={params} reads={createReadCache()} preview={!isArea}>
+    <PreviewBridge editor={preview.claims.editor} token={preview.token} />
+  </SurfacePage>
+)}

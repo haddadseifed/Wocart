@@ -1,0 +1,28 @@
+---
+/**
+ * ReviewsIsland.astro
+ * A Server Island that fetches and renders a product's reviews, so the product
+ * page stays static and cached while this part streams in.
+ *
+ * Island props are encrypted into the island request URL, so this component
+ * takes a copy *pick* — the strings it actually renders, never the pack (see
+ * bridges/island-props.ts and `server-islands.test.ts` for the 2048-byte
+ * budget) — and the product's rating summary, read with the product. The
+ * review form renders with the page itself (ReviewForm.astro).
+ */
+import ReviewsList from "./ReviewsList.astro";
+import type { ReviewsIslandCopy } from "@/theme/bridges/island-props";
+
+interface Props {
+  productId: string;
+  copy: ReviewsIslandCopy;
+  /** The product's approved reviews, all of them: their average and count. */
+  stats: { avgRating: number; reviewCount: number } | null;
+}
+
+const { productId, copy, stats } = Astro.props;
+
+const reviewsData = await Astro.locals.store.client.products.reviews.list(productId, { limit: 10 });
+---
+
+<ReviewsList reviews={reviewsData.rows} total={reviewsData.total} stats={stats} copy={copy} productId={productId} />
