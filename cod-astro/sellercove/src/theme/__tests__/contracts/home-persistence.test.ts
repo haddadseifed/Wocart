@@ -86,7 +86,7 @@ describe("the home surface — what the home surface renders", () => {
   });
 
   it("a document this theme wrote, at any of its versions, is the saved one", () => {
-    const decision = resolveHome({ version: 1, surface: "home", theme: { key: "theme-00", version: "0.9.0" }, sections: [{ id: "h", type: "hero" }] });
+    const decision = resolveHome({ version: 1, surface: "home", theme: { key: "sellercove", version: "0.9.0" }, sections: [{ id: "h", type: "hero" }] });
 
     expect(decision.source).toBe("saved");
     expect(decision.reason).toBeNull();
