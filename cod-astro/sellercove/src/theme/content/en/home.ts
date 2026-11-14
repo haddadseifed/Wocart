@@ -6,7 +6,7 @@ import type { HomeStrings } from "../types/home";
 
 export const enHome: HomeStrings = {
   heroTitle: "Useful things. Chosen with intention.",
-  heroSubtitle: "A focused collection of everyday products, selected for quality, function and lasting value.",
+  heroSubtitle: "A focused collection of useful products, with clear details and practical value.",
   trust1Title: "Thoughtful selection",
   trust2Title: "Clear product details",
   trust3Title: "Support when you need it",
@@ -39,8 +39,8 @@ export const enHome: HomeStrings = {
   feature2Sub: "Details before decisions",
   feature3Title: "Straightforward ordering",
   feature3Sub: "No unnecessary steps",
-  feature5Title: "Built to grow",
-  feature5Sub: "A store designed for what's next",
+  feature5Title: "Cash on delivery",
+  feature5Sub: "Available for eligible orders in Algeria",
   promoTitle: "Need a hand choosing?",
   promoSub: "Contact our team with product or delivery questions.",
   promoCtaText: "Contact SellerCove",
