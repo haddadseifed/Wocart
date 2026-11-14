@@ -5,7 +5,7 @@ import { SCHEME_OF } from "@/theme/appearance";
 import { collectionRead, copyOverrides, schemeField, styleField } from "../shared";
 
 /** A few products are read so the first one with a photo, in stock, can lead. */
-const HERO_READ = 6;
+const HERO_READ = 8;
 
 /**
  * The page's first view: a large photo — the merchant's own, else the first
