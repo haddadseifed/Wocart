@@ -33,6 +33,8 @@ jobs:
         working-directory: cod-astro/sellercove
       - run: npm test
         working-directory: cod-astro/sellercove
+      - run: npm run validate:all
+        working-directory: cod-astro/sellercove
       - run: npx astro check
         working-directory: cod-astro/sellercove
       - run: npm run build
