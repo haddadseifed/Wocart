@@ -14,11 +14,11 @@ export const arProduct: ProductStrings = {
   productReviewCount_many: "{count} تقييماً",
   productReviewCount_other: "{count} تقييم",
   productSaving: "وفّر {amount}\u00A0{currency}",
-  productDeliveryNote: "توصيل عبر كامل الجزائر، للمنزل أو لمكتب التوصيل",
+  productDeliveryNote: "تختلف خيارات التوصيل حسب عنوانك وأهلية الطلب",
   productCountdownLabel: "ينتهي العرض بعد",
   productDescriptionTitle: "الوصف",
   productPoliciesTitle: "التوصيل والإرجاع",
   productAssureNoPrepay: "لا دفع مسبق",
   productAssureCall: "نتصل بك للتأكيد",
-  productAssureDelivery: "توصيل عبر كامل الجزائر",
+  productAssureDelivery: "تُؤكَّد التغطية عند إتمام الطلب",
 };
