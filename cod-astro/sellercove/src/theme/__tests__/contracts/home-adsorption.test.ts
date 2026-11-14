@@ -151,12 +151,7 @@ describe("home adsorption — the shipped document", () => {
     expect(shipped.issues).toEqual([]);
     expect(shipped.page?.sections.map((s) => s.type)).toEqual([
       "hero",
-      "marquee",
-      "category-cards",
-      "product-tabs",
-      "image-banner",
-      "how-it-works",
-      "customer-testimonials",
+      "rich-text",
       "features-bar",
     ]);
   });
@@ -177,13 +172,13 @@ describe("home adsorption — copy (contentKey bridge)", () => {
     const { client } = createStorefrontStub();
     const { render } = createHarness(client);
     const hero = await render(shippedSection("hero"));
-    const how = await render(shippedSection("how-it-works"));
+    const story = await render(shippedSection("rich-text"));
     const features = await render(shippedSection("features-bar"));
     const promo = await render(inserted("whatsapp-cta"));
     expect(decode(hero)).toContain(en.heroTitle);
     expect(decode(hero)).toContain(en.heroCtaPrimary);
-    expect(decode(how)).toContain(en.howItWorksTitle);
-    expect(decode(how)).toContain(en.howStep1Title);
+    expect(decode(story)).toContain("A more considered way to shop");
+    expect(decode(story)).toContain("SellerCove is preparing its first selection.");
     expect(decode(features)).toContain(en.feature1Title);
     expect(decode(promo)).toContain(en.promoTitle);
   });
@@ -209,7 +204,7 @@ describe("home adsorption — data graph (one read per resource per render)", ()
     const best = await render(inserted("best-sellers"));
     const again = await render(inserted("best-sellers"));
     const arrivals = await render(inserted("new-arrivals"));
-    const cards = await render(shippedSection("category-cards"));
+    const cards = await render(inserted("category-cards"));
 
     expect(stub.productsList.mock.calls.map(([filters]) => filters?.collection ?? "catalog").sort()).toEqual(["best-sellers", "catalog", "new-arrivals"]);
     expect(stub.categoriesList).toHaveBeenCalledTimes(1);
@@ -253,7 +248,7 @@ describe("home adsorption — reviews (config default, override, in-section read
   it("config off, no override: the section is absent and no review read happens", async () => {
     const stub = createStorefrontStub([FEATURED]);
     const { render } = createHarness(stub.client, { ...TEST_CONFIG, reviewsEnabled: false });
-    const html = await render(shippedSection("customer-testimonials"));
+    const html = await render(inserted("customer-testimonials"));
     expect(decode(html)).not.toContain(en.testimonialsTitle);
     expect(stub.reviewsList).not.toHaveBeenCalled();
   });
@@ -261,7 +256,7 @@ describe("home adsorption — reviews (config default, override, in-section read
   it("config on: the section renders reviews fetched by the section itself", async () => {
     const stub = createStorefrontStub([FEATURED]);
     const { render } = createHarness(stub.client, { ...TEST_CONFIG, reviewsEnabled: true });
-    const html = await render(shippedSection("customer-testimonials"));
+    const html = await render(inserted("customer-testimonials"));
     expect(decode(html)).toContain(en.testimonialsTitle);
     expect(html).toContain("Fast and honest");
     expect(stub.reviewsList).toHaveBeenCalledTimes(1);
@@ -291,12 +286,7 @@ describe("home adsorption — the full page", () => {
 
     const order = [
       en.heroTitle,
-      en.trust1Title,
-      "/category/watches",
-      en.productTabsTitle,
-      en.bannerTitle,
-      en.howItWorksTitle,
-      en.testimonialsTitle,
+      "A more considered way to shop",
       en.feature1Title,
     ];
     let cursor = -1;
@@ -306,17 +296,11 @@ describe("home adsorption — the full page", () => {
       cursor = at;
     }
 
-    // The whole page reads each list once — the banner shares the tabs' sale
-    // read, the hero its photo collection — and the categories once.
-    expect(stub.productsList.mock.calls.map(([filters]) => (filters?.onSale ? "on-sale" : filters?.collection ?? "catalog")).sort()).toEqual([
-      "best-sellers",
-      "catalog",
-      "featured",
-      "new-arrivals",
-      "on-sale",
-    ]);
-    expect(stub.categoriesList).toHaveBeenCalledTimes(1);
+    // The shipped home document has one product-backed section: the hero.
+    // Editorial copy and the features strip must not trigger catalogue reads.
+    expect(stub.productsList.mock.calls.map(([filters]) => filters?.collection ?? "catalog")).toEqual(["featured"]);
+    expect(stub.categoriesList).not.toHaveBeenCalled();
     expect(text).toContain("Featured Watch");
-    expect(text).toContain("Plain Mug");
+    expect(text).not.toContain("Plain Mug");
   });
 });
