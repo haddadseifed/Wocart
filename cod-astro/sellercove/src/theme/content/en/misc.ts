@@ -35,7 +35,7 @@ export const enMisc: MiscStrings = {
   ariaStarRating_one: "{count} star",
   ariaStarRating_other: "{count} stars",
   thankYouPageTitle: "Order Received",
-  defaultMetaDescription: "Shop from {storeName} - Best products at great prices with delivery nationwide",
+  defaultMetaDescription: "Explore {storeName} for useful products, clear details and straightforward ordering",
   productPageTitle: "{product} - {storeName}",
   collectionPageTitle: "{collection} - {storeName}",
   documentTitle: "{title} - {storeName}",
