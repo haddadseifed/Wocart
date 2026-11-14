@@ -18,7 +18,7 @@ interface Props {
   defaultVariantId: string | null;
 }
 
-const { product, offers, basePrice, comparePrice, cur, isRTL, content, defaultVariantId } = Astro.props;
+const { product, offers, basePrice, comparePrice, cur, content, defaultVariantId } = Astro.props;
 const locale = Astro.locals.store.locale;
 const hasVariants = product.hasVariants && product.variantOptions && product.variantOptions.length > 0;
 const photo = productImageSource(product);
