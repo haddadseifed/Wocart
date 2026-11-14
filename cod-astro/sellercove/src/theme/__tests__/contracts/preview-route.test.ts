@@ -127,7 +127,7 @@ describe("the preview route", () => {
     // Every section, then the blocks inside it, in document order.
     const tree = (nodes: readonly ComponentInstance[]): string[] =>
       nodes.flatMap((node) => [`${node.id}${node.hidden ? " (hidden)" : ""}`, ...tree(Object.values(node.slots ?? {}).flat())]);
-    expect(starts(html)).toEqual(tree((shippedHome as PageData).sections));
+    expect(starts(html)).toEqual(tree((shippedHome as unknown as PageData).sections));
   });
 
   it("renders a product draft for the product its path names, or the store's first", async () => {
