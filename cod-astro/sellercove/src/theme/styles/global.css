@@ -1,5 +1,5 @@
 /*
- * Theme-00 — the storefront every CodFlow store starts with.
+ * SellerCove — an editorial storefront built around useful products and clear choices.
  *
  * Photographs carry the page: they fill tall cards, tiles and banners edge to
  * edge. Around them the page is quiet — white and stone grounds, a deep ink
@@ -109,13 +109,13 @@
 
 :root {
   /* The first default scheme: what a page shows when its scheme is missing. */
-  --wc-color-background: #ffffff;
-  --wc-color-text: #3b4250;
-  --wc-color-heading: #0f1626;
-  --wc-color-accent: #c8102e;
-  --wc-color-button: #0f1626;
-  --wc-color-button-text: #ffffff;
-  --wc-color-border: #e8e8e5;
+  --wc-color-background: #F7F5EF;
+  --wc-color-text: #514B40;
+  --wc-color-heading: #050505;
+  --wc-color-accent: #D4AF37;
+  --wc-color-button: #050505;
+  --wc-color-button-text: #F7F5EF;
+  --wc-color-border: #DED8C8;
 
   --font-text: system-ui;
   --font-display: var(--font-text);
