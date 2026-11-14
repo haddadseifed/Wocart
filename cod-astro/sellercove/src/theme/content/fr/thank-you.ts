@@ -11,10 +11,10 @@ export const frThankYou: ThankYouStrings = {
   totalAmountLabel: "Montant total",
   codNote: "Paiement à la livraison — aucun paiement anticipé requis",
   step1Title: "Confirmation de commande",
-  step1Sub: "Dans les 24 heures",
+  step1Sub: "Nous vous contacterons pour confirmer",
   step2Title: "Préparation",
   step2Sub: "et emballage du produit",
   step3Title: "Livraison",
-  step3Sub: "à votre porte",
+  step3Sub: "à l’adresse ou au point de retrait choisi",
   backToStore: "Retour au magasin",
 };
