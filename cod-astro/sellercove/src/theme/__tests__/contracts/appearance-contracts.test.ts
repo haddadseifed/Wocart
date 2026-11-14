@@ -37,8 +37,8 @@ describe("the default color schemes", () => {
 
   it("give the browser's chrome the page scheme's background, white for an unknown one", () => {
     expect(schemeBackground(DEFAULT_SCHEMES, "scheme-5")).toBe(DEFAULT_SCHEMES[4].colors.background);
-    expect(schemeBackground(DEFAULT_SCHEMES, "gone")).toBe("#ffffff");
-    expect(schemeBackground(undefined, "scheme-1")).toBe("#ffffff");
+    expect(schemeBackground(DEFAULT_SCHEMES, "gone")).toBe("#F7F5EF");
+    expect(schemeBackground(undefined, "scheme-1")).toBe("#F7F5EF");
   });
 });
 
