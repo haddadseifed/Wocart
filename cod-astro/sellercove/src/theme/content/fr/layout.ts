@@ -5,7 +5,7 @@
 import type { LayoutStrings } from "../types/layout";
 
 export const frLayout: LayoutStrings = {
-  announcementText: "Paiement à la livraison disponible dans toutes les wilayas",
+  announcementText: "Paiement à la livraison pour les commandes éligibles",
   announcePrevious: "Annonce précédente",
   announceNext: "Annonce suivante",
 
@@ -14,7 +14,7 @@ export const frLayout: LayoutStrings = {
   navMenu: "Menu",
   navMenuClose: "Fermer le menu",
 
-  footerAbout: "Votre boutique en ligne de confiance en Algérie avec paiement à la livraison",
+  footerAbout: "Une sélection ciblée de produits utiles, avec des informations claires et un accompagnement si nécessaire",
   footerQuickLinks: "Liens rapides",
   footerSupport: "Support client",
   footerRights: "Tous droits réservés",
