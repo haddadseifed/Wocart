@@ -1,9 +1,4 @@
 ---
-// The page's first view. A large photo fills one half — the merchant's own,
-// else the first product of a collection — and the store's promise sits on
-// the other, in the section's colors: a headline, a line, two actions. On a
-// phone the photo comes first, square, the words under it. Without any photo
-// the promise stands alone, centered.
 import { Image } from "astro:assets";
 import type { InferProps } from "@wocart/theme";
 import type { StoreFrontContent } from "@/theme/content";
@@ -40,6 +35,18 @@ const focus = own?.position ?? "50% 55%";
         />
       </div>
     )}
+    {!photo && (
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 520 520" focusable="false">
+          <path class="contour contour-outer" d="M260 34C382 34 486 133 486 255S388 486 260 486 34 381 34 255 138 34 260 34Z" />
+          <path class="contour contour-mid" d="M260 91C353 91 429 164 429 255S351 429 260 429 91 348 91 255 167 91 260 91Z" />
+          <path class="contour contour-inner" d="M260 148C320 148 372 196 372 255S322 372 260 372 148 318 148 255 199 148 260 148Z" />
+          <path class="coastline" d="M105 305C143 273 149 212 192 183C226 160 262 177 284 207C307 238 326 258 359 249C387 241 404 215 421 188" />
+          <circle class="core" cx="260" cy="255" r="8" />
+          <circle class="satellite" cx="421" cy="188" r="4" />
+        </svg>
+      </div>
+    )}
     <div class="hero-copy">
       <h1 class="hero-title">{content.heroTitle}</h1>
       {content.heroSubtitle && <p class="hero-sub">{content.heroSubtitle}</p>}
@@ -57,20 +64,34 @@ const focus = own?.position ?? "50% 55%";
   .hero-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
   .hero-copy { display: flex; flex-direction: column; padding: 1.75rem 1rem 2.25rem; }
   .hero-title {
+    max-width: 15ch;
     font-size: var(--text-3xl);
-    line-height: 1.32;
+    line-height: 1.18;
     font-weight: 600;
+    letter-spacing: -0.035em;
   }
-  .hero-sub { margin-top: 0.75rem; max-width: 32rem; font-size: var(--text-md); color: var(--clr-text); }
-  .hero-actions { display: flex; gap: 0.625rem; margin-top: 1.5rem; }
-  .hero-actions > a { flex: 1; width: auto; padding-inline: 1rem; }
-  .no-photo .hero-copy { align-items: center; text-align: center; padding-block: 4rem; }
-  .no-photo .hero-sub { margin-inline: auto; }
-  .no-photo .hero-actions { justify-content: center; }
-  .no-photo .hero-actions > a { flex: none; padding-inline: 1.75rem; }
+  [dir="rtl"] .hero-title { letter-spacing: 0; }
+  .hero-sub { margin-top: 1rem; max-width: 34rem; font-size: var(--text-md); color: var(--clr-text); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+  .hero-actions > a { flex: 1 1 auto; width: auto; padding-inline: 1.25rem; }
+  .hero-art { display: grid; place-items: center; min-height: 14rem; padding: 1rem; color: var(--clr-accent); }
+  .hero-art svg { display: block; width: min(100%, 19rem); height: auto; overflow: visible; }
+  .contour { fill: none; stroke: currentColor; stroke-width: 1; }
+  .contour-outer { opacity: 0.22; }
+  .contour-mid { opacity: 0.38; }
+  .contour-inner { opacity: 0.55; }
+  .coastline { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .core { fill: currentColor; }
+  .satellite { fill: var(--clr-bg); stroke: currentColor; stroke-width: 2; }
+  .no-photo .hero-copy { align-items: flex-start; text-align: start; padding-block: 2.5rem 1.5rem; }
+  .no-photo .hero-sub { margin-inline: 0; }
+  .no-photo .hero-actions { justify-content: flex-start; }
+  .no-photo .hero-actions > a { flex: 0 1 auto; }
   @media (min-width: 640px) {
     .hero-copy { padding-inline: 1.5rem; }
     .hero-title { font-size: var(--text-4xl); }
+    .hero-art { min-height: 19rem; }
+    .hero-art svg { width: min(100%, 23rem); }
   }
   @media (min-width: 1024px) {
     .hero-grid.has-photo { grid-template-columns: 1fr 1fr; min-height: min(40rem, calc(100svh - 8rem)); }
@@ -82,18 +103,14 @@ const focus = own?.position ?? "50% 55%";
       padding-inline: max(2.5rem, calc((100vw - 85rem) / 2 + 2.5rem)) 4rem;
     }
     .photo-start .hero-copy { padding-inline: 4rem max(2.5rem, calc((100vw - 85rem) / 2 + 2.5rem)); }
-    .hero-title { font-size: var(--text-6xl); line-height: 1.22; }
-    .hero-sub { margin-top: 1.125rem; font-size: var(--text-lg); }
+    .hero-title { font-size: var(--text-6xl); line-height: 1.08; }
+    .hero-sub { margin-top: 1.25rem; font-size: var(--text-lg); }
     .hero-actions { margin-top: 2.25rem; }
     .hero-actions > a { flex: none; min-width: 11.25rem; }
-    .no-photo .hero-copy { padding-block: 7rem; }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-title, .hero-sub, .hero-actions { animation: hero-rise 0.9s var(--ease-out-expo) both; }
-    .hero-sub { animation-delay: 0.08s; }
-    .hero-actions { animation-delay: 0.16s; }
-    .hero-photo :global(img) { animation: hero-settle 1.2s var(--ease-out-expo) both; }
-    @keyframes hero-rise { from { opacity: 0; transform: translateY(1rem); } }
-    @keyframes hero-settle { from { transform: scale(1.04); } }
+    .hero-grid.no-photo { grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr); align-items: center; min-height: 36rem; }
+    .no-photo .hero-copy { padding-block: 6rem; padding-inline: max(2.5rem, calc((100vw - 85rem) / 2 + 2.5rem)) 2rem; }
+    .no-photo .hero-title { font-size: clamp(var(--text-5xl), 5vw, 5.5rem); line-height: 1.04; }
+    .no-photo .hero-art { min-height: 32rem; }
+    .no-photo .hero-art svg { width: min(100%, 30rem); }
   }
 </style>
