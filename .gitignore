@@ -20,7 +20,19 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Track only reviewed, project-scoped Claude Code skills; keep local settings ignored.
 .claude/
+!.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/frontend-design/
+!.claude/skills/frontend-design/**
+!.claude/skills/webapp-testing/
+!.claude/skills/webapp-testing/**
+!.claude/skills/sellercove-engineering/
+!.claude/skills/sellercove-engineering/**
 
 /docs/
 /cod-astro/*
