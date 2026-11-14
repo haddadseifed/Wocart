@@ -7,7 +7,7 @@ Read `THEME_GUIDE.md` for the Wocart theme contract and the root `AGENTS.md` for
 ## Non-negotiable rules
 
 - Keep platform reads and actions inside the SDK seams already present in this theme. Do not reimplement product, price, stock, delivery, order, OTP, or checkout logic.
-- Every shopper-visible string belongs in the Arabic, French and English content packs; keep the locale packs type-aligned.
+- Every UI label and default storefront string belongs in the Arabic, French and English content packs; keep them type-aligned. Page-specific editorial copy belongs in the localized page document.
 - Keep theme identity unique: `src/theme/key.ts` must remain `sellercove`.
 - Never add demo products, fake prices, fabricated reviews, false scarcity, or unverified delivery/payment claims.
 - Wocart's current order and fulfilment path is Algeria-focused. Do not claim international checkout or delivery until a separately supported and configured path exists.
