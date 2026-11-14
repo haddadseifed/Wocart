@@ -19,6 +19,6 @@ export const arProduct: ProductStrings = {
   productDescriptionTitle: "الوصف",
   productPoliciesTitle: "التوصيل والإرجاع",
   productAssureNoPrepay: "لا دفع مسبق",
-  productAssureCall: "نتصل بك للتأكيد",
+  productAssureCall: "تأكيد تفاصيل الطلب",
   productAssureDelivery: "تُؤكَّد التغطية عند إتمام الطلب",
 };
