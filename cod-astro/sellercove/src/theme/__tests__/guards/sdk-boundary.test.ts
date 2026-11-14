@@ -20,7 +20,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { join } from "node:path";
 import { STOREFRONT_API_PATHS, STOREFRONT_PAGE_PATHS } from "@wocart/storefront";
 
 import { type SourceFile, SRC_DIR, themeSourceFiles } from "./theme-source";
