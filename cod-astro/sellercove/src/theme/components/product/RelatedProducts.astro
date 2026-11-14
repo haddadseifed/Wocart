@@ -1,0 +1,94 @@
+---
+/**
+ * Related products.
+ *
+ * A COD storefront is usually reached from an ad, straight onto one product
+ * page. A shopper who decides "not this one" has nowhere to go but back to the
+ * ad, so this exists to catch that exit — and, now that there is a basket, to
+ * give them a reason to add a second thing.
+ *
+ * It sits at the END of the page, after the description and the reviews, and
+ * deliberately not under the order form. A grid of alternatives directly below
+ * the buy button invites a shopper to wander off mid-decision; down here it
+ * only meets the ones who were already leaving.
+ *
+ * "Related" means the same category, because category is the only relationship
+ * this data actually has. Anything dressed up as "frequently bought together"
+ * would need order-history mining, and inventing it from nothing would just be
+ * a random grid with a confident label.
+ *
+ * Rendered as a deferred server island: the fetch happens after the product is
+ * already on screen, so this can never cost the page its LCP. If the request
+ * fails, the section is simply absent — a storefront must not break because a
+ * suggestion could not be loaded.
+ */
+import ProductCard from "@/theme/components/product/ProductCard.astro";
+import SectionHead from "@/theme/components/ui/SectionHead.astro";
+import Section from "@/theme/components/ui/Section.astro";
+import type { StyleValue } from "@wocart/theme";
+import type { ProductList } from "@wocart/storefront";
+import {
+  usableRelated,
+  shouldShowRelated,
+  MAX_RELATED,
+  MIN_RELATED,
+} from "@/theme/utils/related-products";
+import type { RelatedProductsCopy } from "@/theme/bridges/island-props";
+
+interface Props {
+  /** The product being viewed — excluded from its own suggestions. */
+  productId: string;
+  /** Its category, when it has one. */
+  categoryId: string | null;
+  currencySymbol: string;
+  /**
+   * Island props are encrypted into the island request URL — a pick, never the
+   * pack (see bridges/island-props.ts and `server-islands.test.ts`).
+   */
+  copy: RelatedProductsCopy;
+  scheme?: string | undefined;
+  style?: StyleValue | undefined;
+}
+
+const { productId, categoryId, currencySymbol, copy, scheme, style } = Astro.props;
+
+// Selection rules live in related-products.ts so they can be tested.
+let related: ProductList[] = [];
+
+if (categoryId) {
+  related = usableRelated(
+    await Astro.locals.store.client.products.list({ categoryId, limit: MAX_RELATED + 1 }),
+    productId,
+  );
+}
+
+// A thin category — or a product filed under none — still deserves somewhere
+// to go, so fall back to the catalog at large rather than showing nothing.
+// Fetched only when needed: a rich category costs one request, not two.
+if (related.length < MIN_RELATED) {
+  related = usableRelated(await Astro.locals.store.client.products.list({ limit: MAX_RELATED + 1 }), productId);
+}
+
+const show = shouldShowRelated(related.length);
+// Whole rows on a wide screen: four across, never a lone card under them.
+const shown = related.length > 4 ? related.slice(0, related.length - (related.length % 4)) : related;
+---
+
+{show && (
+  <Section scheme={scheme} style={style} label={copy.relatedTitle}>
+    <SectionHead title={copy.relatedTitle} sub={copy.relatedSub} center />
+
+    {/* A phone swipes a row, as the home page's product rows do; a wide
+        screen shows whole rows. The cards carry no order button: down here
+        they are for browsing, and the card itself is the link. */}
+    <div class="is-carousel">
+      <ul class="product-row">
+        {shown.map((product) => (
+          <li>
+            <ProductCard product={product} currencySymbol={currencySymbol} copy={copy} action={false} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+)}

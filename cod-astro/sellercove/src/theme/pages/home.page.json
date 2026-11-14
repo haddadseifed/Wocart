@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "surface": "home",
+  "sections": [
+    {
+      "id": "cmp_sc_hero",
+      "type": "hero",
+      "props": {
+        "ctaPrimaryHref": "/products",
+        "ctaSecondaryHref": "/contact",
+        "scheme": "scheme-5"
+      }
+    },
+    {
+      "id": "cmp_sc_categories",
+      "type": "category-cards",
+      "props": {
+        "limit": 4,
+        "showAll": false,
+        "headingAlign": "start",
+        "scheme": "scheme-1"
+      }
+    },
+    {
+      "id": "cmp_sc_featured",
+      "type": "featured-products",
+      "props": {
+        "source": "collection",
+        "collection": "featured",
+        "limit": 8,
+        "showViewAll": true,
+        "layout": "grid",
+        "columns": 4,
+        "headingAlign": "start",
+        "scheme": "scheme-1"
+      }
+    },
+    {
+      "id": "cmp_sc_story",
+      "type": "rich-text",
+      "props": {
+        "alignment": "center",
+        "scheme": "scheme-1",
+        "richTextTitle": {
+          "en": "A more considered way to shop",
+          "fr": "Une autre façon de faire ses achats",
+          "ar": "طريقة أكثر وعياً للتسوّق"
+        },
+        "body": {
+          "en": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A good store should make decisions easier. We keep the experience focused, explain what matters and let you choose with confidence—without pressure or clutter."
+                  }
+                ]
+              }
+            ]
+          },
+          "fr": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Une bonne boutique doit faciliter vos choix. Nous allons à l’essentiel, expliquons ce qui compte et vous laissons décider en confiance — sans pression ni superflu."
+                  }
+                ]
+              }
+            ]
+          },
+          "ar": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "ينبغي للمتجر الجيد أن يجعل الاختيار أسهل. نركّز على ما يهم، ونوضح التفاصيل، ونمنحك مساحة لاتخاذ قرارك بثقة، بلا ضغط أو ازدحام."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "cmp_sc_how",
+      "type": "how-it-works",
+      "props": {
+        "scheme": "scheme-2"
+      }
+    },
+    {
+      "id": "cmp_sc_features",
+      "type": "features-bar",
+      "props": {
+        "feature1Icon": "badge",
+        "feature2Icon": "shield",
+        "feature3Icon": "chat",
+        "feature5Icon": "cash",
+        "scheme": "scheme-2"
+      }
+    }
+  ]
+}

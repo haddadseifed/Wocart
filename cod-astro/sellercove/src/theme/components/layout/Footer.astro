@@ -1,0 +1,124 @@
+---
+// The store's footer: the columns the merchant arranges (about, menus, the
+// store's pages, a few lines of text), then a closing line with the store's
+// name, the year and how it is paid.
+import Blocks from "@wocart/theme/astro/Blocks.astro";
+import { hasBlocks, isPreview, type BlocksHandle } from "@wocart/theme/astro";
+import type { InferProps } from "@wocart/theme";
+import { Icon } from "astro-icon/components";
+import Section from "@/theme/components/ui/Section.astro";
+import type { footer } from "@/theme/catalog/footer/footer.def";
+
+type Props = InferProps<typeof footer> & { blocks: BlocksHandle };
+
+const { blocks, scheme, style } = Astro.props;
+const { config, content } = Astro.locals.store;
+const year = new Date().getFullYear();
+const columns = hasBlocks(blocks, "columns") || isPreview(blocks);
+---
+
+<Section as="div" scheme={scheme} style={style}>
+  <footer class="site-footer">
+    {columns && (
+      <div class="footer-grid">
+        <Blocks of={blocks} slot="columns" />
+      </div>
+    )}
+    <div class="footer-base">
+      <p>&copy; {year} {config.name}. {content.footerRights}</p>
+      <p class="footer-pay">
+        <Icon name="heroicons:check-badge" aria-hidden="true" />
+        <span>{content.trust1Title}</span>
+      </p>
+    </div>
+  </footer>
+</Section>
+
+<style>
+  .site-footer { font-size: var(--text-sm); }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.25rem 1.25rem;
+    padding-bottom: 2.75rem;
+  }
+  @media (min-width: 1024px) {
+    .footer-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem; padding-bottom: 4rem; }
+  }
+  .footer-grid :global(.footer-col) { grid-column: span 1; min-width: 0; }
+  .footer-grid :global(.footer-about) { grid-column: 1 / -1; }
+  @media (min-width: 1024px) {
+    .footer-grid :global(.footer-col) { grid-column: span 3; }
+    .footer-grid :global(.footer-about) { grid-column: span 5; padding-inline-end: 3rem; }
+    .footer-grid :global(.footer-about ~ .footer-col) { grid-column: span 2; }
+  }
+  .footer-grid :global(.footer-brand) {
+    display: inline-flex;
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--clr-ink);
+    text-decoration: none;
+  }
+  .footer-grid :global(.footer-brand img) { width: auto; max-width: 11rem; max-height: 3rem; object-fit: contain; }
+  .footer-grid :global(.footer-about-text) { margin-top: 0.875rem; max-width: 26rem; color: var(--clr-text); line-height: 1.9; }
+  .footer-grid :global(.footer-whatsapp) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.875rem;
+    margin-top: 1.25rem;
+    padding-inline: 1.125rem;
+    border-radius: var(--radius-round);
+    background: var(--clr-whatsapp);
+    color: var(--clr-on-whatsapp);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .footer-grid :global(.footer-whatsapp svg) { width: 1.25rem; height: 1.25rem; }
+  .footer-grid :global(.footer-social) { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; padding: 0; list-style: none; }
+  .footer-grid :global(.footer-social a) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-round);
+    color: var(--clr-ink);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .footer-grid :global(.footer-social a:hover) { color: var(--clr-accent); border-color: currentColor; }
+  .footer-grid :global(.footer-title) {
+    margin-bottom: 0.875rem;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--clr-ink);
+  }
+  .footer-grid :global(.footer-links) { display: grid; gap: 0.125rem; }
+  .footer-grid :global(.footer-links a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    color: var(--clr-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-grid :global(.footer-links a:hover) { color: var(--clr-ink); }
+  .footer-grid :global(.footer-text) { color: var(--clr-text); }
+  .footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--clr-border);
+    color: var(--clr-text);
+    font-size: var(--text-xs);
+  }
+  .footer-pay { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--clr-ink); font-weight: 500; }
+  .footer-pay :global(svg) { width: 1.125rem; height: 1.125rem; color: var(--clr-accent); }
+</style>
