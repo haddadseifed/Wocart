@@ -16,6 +16,6 @@ export const frProduct: ProductStrings = {
   productDescriptionTitle: "Description",
   productPoliciesTitle: "Livraison et retours",
   productAssureNoPrepay: "Rien à payer d’avance",
-  productAssureCall: "Un appel pour confirmer",
+  productAssureCall: "Détails de commande confirmés",
   productAssureDelivery: "Couverture confirmée à la commande",
 };
