@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * theme-00 String Validation Script
+ * SellerCove String Validation Script
  * 
  * Scans all theme components and pages for hardcoded user-facing strings
  * that violate THEME_GUIDE.md Rule 1: "Never hardcode a visible string"
@@ -307,7 +307,7 @@ class StringValidator {
    * Run the validation
    */
   validate() {
-    console.log('🔍 Scanning theme-00 for hardcoded user-facing strings...\n');
+    console.log('🔍 Scanning SellerCove for hardcoded user-facing strings...\n');
     
     const startTime = Date.now();
     
@@ -332,7 +332,7 @@ class StringValidator {
     
     if (this.violations.length === 0) {
       console.log('✅ SUCCESS: No hardcoded user-facing strings found!');
-      console.log('🎉 theme-00 is fully compliant with THEME_GUIDE.md Rule 1\n');
+      console.log('🎉 SellerCove is fully compliant with THEME_GUIDE.md Rule 1\n');
       return true;
     } else {
       console.log('❌ VIOLATIONS FOUND:\n');
