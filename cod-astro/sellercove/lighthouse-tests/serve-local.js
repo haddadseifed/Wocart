@@ -28,7 +28,7 @@ app.use('/', expressStaticGzip(distPath, {
 }));
 
 // Handle client-side routing (SPA fallback)
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
