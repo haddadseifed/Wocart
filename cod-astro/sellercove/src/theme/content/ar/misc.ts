@@ -47,7 +47,7 @@ export const arMisc: MiscStrings = {
   ariaStarRating_many: "{count} نجمة",
   ariaStarRating_other: "{count} نجمة",
   thankYouPageTitle: "تم استلام طلبك",
-  defaultMetaDescription: "تسوق من {storeName} - أفضل المنتجات بأسعار مناسبة مع توصيل لجميع الولايات",
+  defaultMetaDescription: "اكتشف {storeName}: منتجات مفيدة، ومعلومات واضحة، وطلب بخطوات بسيطة",
   productPageTitle: "{product} - {storeName}",
   collectionPageTitle: "{collection} - {storeName}",
   documentTitle: "{title} - {storeName}",
