@@ -11,10 +11,10 @@ export const arThankYou: ThankYouStrings = {
   totalAmountLabel: "المبلغ الإجمالي",
   codNote: "الدفع عند الاستلام — لا دفع مسبق مطلوب",
   step1Title: "تأكيد الطلب",
-  step1Sub: "خلال 24 ساعة",
+  step1Sub: "سنتواصل معك لتأكيد الطلب",
   step2Title: "التجهيز",
   step2Sub: "وتغليف المنتج",
   step3Title: "التوصيل",
-  step3Sub: "لباب منزلك",
+  step3Sub: "إلى العنوان أو نقطة الاستلام التي اخترتها",
   backToStore: "العودة للمتجر",
 };
