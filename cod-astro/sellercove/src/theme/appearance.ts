@@ -12,9 +12,9 @@ import styleSizes from "./style-sizes.json";
 
 /**
  * The schemes a store starts with. The first is the page's; the others band
- * sections: a stone ground, warm sand behind photos, saffron for a promotion,
- * the night of the footer and the announcement. The accent is the sale color:
- * a saving's tag and a price below its old one. Their ids never change, since
+ * sections: a stone ground, warm sand behind photos, metallic gold for emphasis,
+ * the night of the footer and the announcement. Gold marks savings and key
+ * actions. Their ids never change, since
  * sections store them.
  */
 export const DEFAULT_SCHEMES = [
@@ -98,7 +98,7 @@ export function cardAspect(ratio: string): string {
   return ratio === "square" ? "1 / 1" : ratio === "landscape" ? "4 / 3" : "3 / 4";
 }
 
-/** A scheme's background, for the browser's own chrome (`theme-color`); white when the id names none. */
+/** A scheme's background, for the browser's own chrome; warm ivory when the id names none. */
 export function schemeBackground(schemes: readonly ColorScheme[] | undefined, id: string | undefined): string {
   return (schemes ?? []).find((scheme) => scheme.id === id)?.colors.background ?? "#F7F5EF";
 }
