@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * theme-00 Comprehensive Validation Script
+ * SellerCove Comprehensive Validation Script
  * 
  * Runs all validation checks for THEME_GUIDE.md compliance:
  * - Rule 1: No hardcoded user-facing strings
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('🔍 Running comprehensive theme-00 validation...\n');
+console.log('🔍 Running comprehensive SellerCove validation...\n');
 
 let allPassed = true;
 
@@ -54,13 +54,13 @@ console.log('📊 FINAL VALIDATION RESULTS');
 console.log('═'.repeat(60));
 
 if (allPassed) {
-  console.log('🎉 SUCCESS: theme-00 is 100% compliant with THEME_GUIDE.md!');
+  console.log('🎉 SUCCESS: SellerCove is compliant with THEME_GUIDE.md!');
   console.log('✅ Rule 1: No hardcoded user-facing strings');
   console.log('✅ Rule 2: No hardcoded colors, radius, fonts, or spacing');
-  console.log('\n🚀 theme-00 is ready for production!');
+  console.log('\n🚀 SellerCove checks are ready for review!');
   process.exit(0);
 } else {
-  console.log('❌ FAILURE: theme-00 has compliance violations');
+  console.log('❌ FAILURE: SellerCove has validation failures');
   console.log('💡 Please fix the violations above and re-run this script');
   process.exit(1);
 }
