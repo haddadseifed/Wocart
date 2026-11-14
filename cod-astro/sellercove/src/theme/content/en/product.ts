@@ -10,11 +10,11 @@ export const enProduct: ProductStrings = {
   productReviewCount_one: "{count} review",
   productReviewCount_other: "{count} reviews",
   productSaving: "Save {amount}\u00A0{currency}",
-  productDeliveryNote: "Delivery across Algeria, to your home or a courier desk",
+  productDeliveryNote: "Delivery options depend on your address and order eligibility",
   productCountdownLabel: "Offer ends in",
   productDescriptionTitle: "Description",
   productPoliciesTitle: "Delivery and returns",
   productAssureNoPrepay: "Nothing to pay up front",
   productAssureCall: "A call to confirm",
-  productAssureDelivery: "Delivered across Algeria",
+  productAssureDelivery: "Coverage confirmed at checkout",
 };
