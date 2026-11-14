@@ -1,0 +1,31 @@
+---
+// A category's page: the listing template (`theme/pages/SurfacePage.astro`)
+// over the store's saved category document, or the theme's default.
+import { notFound } from "@wocart/storefront/astro";
+import { createReadCache } from "@wocart/theme/astro";
+import SurfacePage from "@/theme/pages/SurfacePage.astro";
+import { listingCatalog } from "@/theme/catalog/families/listing";
+import { CATEGORIES_READ } from "@/theme/catalog/shared";
+import { message } from "@/theme/content/messages";
+
+const { slug } = Astro.params;
+const { config, content, locale, client } = Astro.locals.store;
+
+// The category first: an unknown slug is a real 404, never an empty 200.
+const [categories, saved] = await Promise.all([client.categories.list(), client.pageData.get("category")]);
+const category = categories.find((candidate) => candidate.slug === slug);
+if (!category) return notFound(Astro);
+const reads = createReadCache();
+reads.get(CATEGORIES_READ, async () => categories);
+---
+
+<SurfacePage
+  theme={listingCatalog}
+  surface="category"
+  document={saved}
+  params={{ slug: category.slug, page: Astro.url.searchParams.get("page") ?? undefined, sort: Astro.url.searchParams.get("sort") ?? undefined }}
+  reads={reads}
+  title={category.metaTitle || message(content, "documentTitle", { title: category.name, storeName: config.name }, locale)}
+  description={category.metaDescription || category.description || undefined}
+  ogImage={category.image?.url}
+/>

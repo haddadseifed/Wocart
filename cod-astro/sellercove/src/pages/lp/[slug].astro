@@ -1,0 +1,21 @@
+---
+// A landing page: the page and its own composition read in one request, then
+// rendered by the landing surface. A placed order redirects to the thank-you
+// page once (the abandonment conversion fires there); a draft, archived or
+// unknown slug is a real 404, never cached.
+import { actions } from "astro:actions";
+import { notFound } from "@wocart/storefront/astro";
+import LandingSurface from "@/theme/pages/LandingSurface.astro";
+import { orderOutcome } from "@/theme/pages/order-outcome";
+
+const { config, content, client, href } = Astro.locals.store;
+const landing = await client.pages.landing(Astro.params.slug ?? "");
+
+const outcome = orderOutcome(Astro.getActionResult(actions.placeOrder), content, Astro.locals.store.locale);
+if (outcome.redirect) return Astro.redirect(href(outcome.redirect), 303);
+if (!landing) return notFound(Astro);
+
+const turnstileOn = config.turnstileEnabled === true && Boolean(config.turnstileSiteKey);
+---
+
+<LandingSurface landing={landing} document={landing.document} softNavigation={!turnstileOn} />

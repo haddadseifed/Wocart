@@ -25,6 +25,7 @@ Thumbs.db
 /docs/
 /cod-astro/*
 !/cod-astro/theme-00/
+!/cod-astro/sellercove/
 /wocart-sdk/
 /.agents/internal-skills/
 /.agents/skills/*

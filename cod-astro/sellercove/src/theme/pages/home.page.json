@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "surface": "home",
+  "sections": [
+    {
+      "id": "cmp_sc_hero",
+      "type": "hero",
+      "props": {
+        "ctaPrimaryHref": "/products",
+        "ctaSecondaryHref": "/contact",
+        "scheme": "scheme-5"
+      }
+    },
+    {
+      "id": "cmp_sc_story",
+      "type": "rich-text",
+      "props": {
+        "alignment": "center",
+        "scheme": "scheme-1",
+        "richTextTitle": {
+          "en": "A more considered way to shop",
+          "fr": "Une autre façon de faire ses achats",
+          "ar": "طريقة أكثر وعياً للتسوّق"
+        },
+        "body": {
+          "en": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "SellerCove is preparing its first selection. We focus on useful products, clear information and thoughtful choices — not an endless catalogue."
+                  }
+                ]
+              }
+            ]
+          },
+          "fr": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "SellerCove prépare sa première sélection. Nous privilégions les produits utiles, les informations claires et les choix réfléchis — pas un catalogue sans fin."
+                  }
+                ]
+              }
+            ]
+          },
+          "ar": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "تحضّر SellerCove أول مجموعة لها. نركّز على المنتجات المفيدة والمعلومات الواضحة والاختيارات المدروسة، لا على كتالوج بلا نهاية."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "cmp_sc_features",
+      "type": "features-bar",
+      "props": {
+        "feature1Icon": "badge",
+        "feature2Icon": "shield",
+        "feature3Icon": "chat",
+        "feature5Icon": "star",
+        "scheme": "scheme-2"
+      }
+    }
+  ]
+}

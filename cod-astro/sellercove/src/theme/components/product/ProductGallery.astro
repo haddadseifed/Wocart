@@ -1,0 +1,163 @@
+---
+// The product's photos. One large photo filling its frame — swiped on a
+// phone, picked from thumbnails on a wide screen — with the saving on it.
+// Thumbnails sit beside the photo or under it, as the merchant chooses. The
+// browser half is `scripts/product.ts` (`#gallery`, `.gallery-dot`,
+// `.gallery-thumb`, and a variant's `data-image-id`).
+import { message } from "@/theme/content/messages";
+import { Image } from "astro:assets";
+import type { ProductDetail } from "@wocart/storefront";
+import type { StoreFrontContent } from "@/theme/content";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  product: ProductDetail;
+  hasDiscount: boolean;
+  discountPct: number;
+  content: StoreFrontContent;
+  thumbnails?: "side" | "below";
+  shape?: "portrait" | "square";
+}
+
+const { product, hasDiscount, discountPct, content, thumbnails = "side", shape = "portrait" } = Astro.props;
+const locale = Astro.locals.store.locale;
+const total = product.images.length;
+const goTo = (index: number) => message(content, "ariaGoToImage", { n: index + 1, total }, locale);
+---
+
+<div class:list={["gallery", total > 1 && thumbnails === "side" && "has-side-thumbs", shape === "square" && "is-square"]}>
+  <div class="stage plate">
+    <div class="gallery-track" id="gallery">
+      {total > 0 ? product.images.map((img, index) => (
+        <div class="gallery-slide" data-image-id={img.id}>
+          <Image
+            src={img.url}
+            alt={img.altText ?? product.name}
+            width={1200}
+            height={1500}
+            widths={[480, 736, 960, 1200]}
+            sizes="(min-width: 1280px) 640px, (min-width: 1024px) 50vw, 100vw"
+            priority={index === 0}
+            loading={index === 0 ? "eager" : "lazy"}
+            decoding="async"
+            quality={85}
+            class="gallery-img"
+          />
+        </div>
+      )) : (
+        <div class="gallery-slide gallery-empty">
+          <Icon name="heroicons:photo" aria-hidden="true" />
+        </div>
+      )}
+    </div>
+
+    {hasDiscount && <span class="badge badge-sale num gallery-discount" aria-hidden="true">-{discountPct}%</span>}
+
+    {total > 1 && (
+      <div class="gallery-pips">
+        {product.images.map((_, index) => (
+          <button type="button" class="gallery-dot" data-index={index} aria-label={goTo(index)}>
+            <span class:list={["gallery-pip", index === 0 && "is-active"]} aria-hidden="true"></span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+
+  {total > 1 && (
+    <div class="gallery-thumbs">
+      {product.images.map((img, index) => (
+        <button type="button" class:list={["gallery-thumb plate", index === 0 && "is-active"]} data-index={index} aria-label={goTo(index)}>
+          <Image src={img.url} alt="" width={168} height={168} loading="lazy" decoding="async" quality={80} />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+  .gallery { display: grid; gap: 0.625rem; }
+  /* A phone shows the photo edge to edge, under the page's own gutters. */
+  .stage {
+    aspect-ratio: 1 / 1;
+    margin-inline: -1rem;
+    border-radius: 0;
+  }
+  @media (min-width: 640px) { .stage { margin-inline: 0; border-radius: var(--radius-media); } }
+  .gallery-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .gallery-track::-webkit-scrollbar { display: none; }
+  .gallery-slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .gallery-slide :global(.gallery-img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .gallery-empty { display: flex; align-items: center; justify-content: center; color: var(--clr-muted); }
+  .gallery-empty :global(svg) { width: 4rem; height: 4rem; }
+  .gallery-discount { position: absolute; top: 0.875rem; inset-inline-start: 0.875rem; z-index: 1; }
+
+  .gallery-pips {
+    position: absolute;
+    bottom: 0.5rem;
+    inset-inline: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.125rem;
+  }
+  .gallery-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    cursor: pointer;
+  }
+  .gallery-pip {
+    display: block;
+    width: 0.5rem;
+    height: 3px;
+    border-radius: var(--radius-tag);
+    background: var(--clr-ink);
+    opacity: 0.3;
+    transition: width 0.3s var(--ease-out-expo), opacity 0.3s ease;
+  }
+  .gallery-pip.is-active { width: 1.5rem; opacity: 1; }
+
+  .gallery-thumbs { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; padding: 0.125rem; }
+  .gallery-thumbs::-webkit-scrollbar { display: none; }
+  .gallery-thumb {
+    flex: none;
+    width: 4.25rem;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1.5px solid var(--clr-clear);
+    border-radius: var(--radius-input);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+  .gallery-thumb:hover { opacity: 1; }
+  .gallery-thumb.is-active { border-color: var(--clr-ink); opacity: 1; }
+
+  @media (min-width: 1024px) {
+    .stage { aspect-ratio: 4 / 5; }
+    .is-square .stage { aspect-ratio: 1 / 1; }
+    .gallery-pips { display: none; }
+    .gallery-thumb { width: 5.25rem; }
+    .has-side-thumbs { grid-template-columns: 5.25rem minmax(0, 1fr); gap: 0.875rem; align-items: start; }
+    .has-side-thumbs .stage { order: 2; }
+    .has-side-thumbs .gallery-thumbs { order: 1; flex-direction: column; max-height: 100%; overflow-y: auto; }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+// Search: the platform finds the products a shopper's words name — in the
+// page's language or the catalog's — best match first unless an order is
+// chosen, a page at a time, in the store's composition of the page. Never
+// indexed: a search is not a page of the store.
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import Sections from "@/theme/components/surface/Sections.astro";
+import { searchCatalog } from "@/theme/catalog/families/search";
+import { message } from "@/theme/content/messages";
+
+const { config, content, locale, client } = Astro.locals.store;
+const query = (Astro.url.searchParams.get("q") ?? "").trim();
+const saved = await client.pageData.get("search");
+const params = { q: query, page: Astro.url.searchParams.get("page") ?? undefined, sort: Astro.url.searchParams.get("sort") ?? undefined, surface: "search" };
+---
+
+<StoreLayout title={message(content, "documentTitle", { title: query || content.searchTitle, storeName: config.name }, locale)} description={content.searchHint} noindex={true}>
+  <Sections theme={searchCatalog} surface="search" document={saved} params={params} />
+</StoreLayout>

@@ -1,0 +1,16 @@
+dist/
+node_modules/
+.astro/
+.wrangler/
+.wrangler-output/
+.dev.vars
+.vercel/
+.vercel
+.env*
+.DS_Store
+
+# Design tool state (local, not product code)
+.impeccable/
+
+# Private notes live in the repository root /docs/, never here.
+/docs/

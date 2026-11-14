@@ -1,0 +1,10 @@
+---
+// The home page: the store's saved home document, rendered by the home
+// surface (`theme/pages/HomeSurface.astro`), which an editor's preview shares.
+// `null` (absent or a degraded read) renders the theme's shipped default.
+import HomeSurface from "@/theme/pages/HomeSurface.astro";
+
+const saved = await Astro.locals.store.client.pageData.get("home");
+---
+
+<HomeSurface document={saved} />

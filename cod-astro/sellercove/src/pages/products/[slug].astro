@@ -1,0 +1,24 @@
+---
+// A product page: the product template (`theme/pages/ProductSurface.astro`)
+// over the store's saved product document, or the theme's default.
+import { notFound } from "@wocart/storefront/astro";
+import ProductSurface from "@/theme/pages/ProductSurface.astro";
+import { actions } from "astro:actions";
+import { orderOutcome } from "@/theme/pages/order-outcome";
+
+const { slug } = Astro.params;
+const { config, content } = Astro.locals.store;
+const turnstileOn = config.turnstileEnabled === true && Boolean(config.turnstileSiteKey);
+
+// A placed order answers with one redirect to the thank-you page (303): the
+// browser follows the POST response, so the form page never renders again.
+// A refused one renders the page with its reasons (the order block reads them).
+const outcome = orderOutcome(Astro.getActionResult(actions.placeOrder), content, Astro.locals.store.locale);
+if (outcome.redirect) return Astro.redirect(Astro.locals.store.href(outcome.redirect), 303);
+
+// The product first: an unknown handle is a real 404, never an empty 200.
+const [product, saved] = await Promise.all([Astro.locals.store.client.products.get(slug!), Astro.locals.store.client.pageData.get("product")]);
+if (!product) return notFound(Astro);
+---
+
+<ProductSurface product={product} document={saved} softNavigation={!turnstileOn} />
