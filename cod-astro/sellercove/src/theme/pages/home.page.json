@@ -12,6 +12,30 @@
       }
     },
     {
+      "id": "cmp_sc_categories",
+      "type": "category-cards",
+      "props": {
+        "limit": 4,
+        "showAll": false,
+        "headingAlign": "start",
+        "scheme": "scheme-1"
+      }
+    },
+    {
+      "id": "cmp_sc_featured",
+      "type": "featured-products",
+      "props": {
+        "source": "collection",
+        "collection": "featured",
+        "limit": 8,
+        "showViewAll": true,
+        "layout": "grid",
+        "columns": 4,
+        "headingAlign": "start",
+        "scheme": "scheme-1"
+      }
+    },
+    {
       "id": "cmp_sc_story",
       "type": "rich-text",
       "props": {
@@ -69,6 +93,13 @@
             ]
           }
         }
+      }
+    },
+    {
+      "id": "cmp_sc_how",
+      "type": "how-it-works",
+      "props": {
+        "scheme": "scheme-2"
       }
     },
     {
