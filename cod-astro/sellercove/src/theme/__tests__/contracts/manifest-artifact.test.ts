@@ -29,7 +29,7 @@ describe("the manifest file", () => {
     const checked = validateThemeManifest(await response.json());
     expect(checked.issues).toEqual([]);
     const manifest = checked.manifest!;
-    expect(manifest.key).toBe("theme-00");
+    expect(manifest.key).toBe("sellercove");
     expect(manifest.version).toBe(theme00.version);
     expect(manifest.sdkVersion).toBe(THEME_SDK_VERSION);
     expect(Object.keys(manifest.components).sort()).toEqual(Object.keys(theme00.components).sort());
