@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * theme-00 Style Validation Script
+ * SellerCove Style Validation Script
  * 
  * Scans all theme components and pages for hardcoded colors, radius, fonts, and spacing
  * that violate THEME_GUIDE.md Rule 2: "Never hardcode a color, radius, font, or spacing value"
@@ -307,7 +307,7 @@ class StyleValidator {
    * Run the validation
    */
   validate() {
-    console.log('🎨 Scanning theme-00 for hardcoded style values...\n');
+    console.log('🎨 Scanning SellerCove for hardcoded style values...\n');
     
     const startTime = Date.now();
     
@@ -332,7 +332,7 @@ class StyleValidator {
     
     if (this.violations.length === 0) {
       console.log('✅ SUCCESS: No hardcoded style values found!');
-      console.log('🎉 theme-00 is fully compliant with THEME_GUIDE.md Rule 2\n');
+      console.log('🎉 SellerCove is fully compliant with THEME_GUIDE.md Rule 2\n');
       return true;
     } else {
       console.log('❌ VIOLATIONS FOUND:\n');
