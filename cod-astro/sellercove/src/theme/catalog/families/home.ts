@@ -30,7 +30,7 @@ export const homeSurface: SurfaceSpec = {
   key: "home",
   label: SURFACE.home,
   pageType: "home",
-  document: homeDocument as PageData,
+  document: homeDocument as unknown as PageData,
 };
 
 export const homeCatalog = defineTheme({
