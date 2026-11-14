@@ -356,7 +356,7 @@ patch.
 
 ## 8. Briefing for a contributor (or an AI agent)
 
-You are working on **theme-00**, Wocart's reference theme. Its job is to be
+You are working on **SellerCove**, a dedicated storefront built on Wocart. Its job is to be
 **broadly useful** — a starting point any store can ship, and the worked example
 other themes copy. That rules out styling choices that only suit one niche.
 
