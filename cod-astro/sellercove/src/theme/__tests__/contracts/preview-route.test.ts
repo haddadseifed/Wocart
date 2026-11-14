@@ -40,14 +40,14 @@ vi.mock("@/theme/pages/ProductSurface.astro", async () => {
 });
 
 const EDITOR = "https://cloud.codflow.store";
-const claims = { aud: "https://boutique.test", theme: "theme-00", editor: EDITOR, iat: 1, exp: 2 };
+const claims = { aud: "https://boutique.test", theme: "sellercove", editor: EDITOR, iat: 1, exp: 2 };
 
 const doc = (text: string) => ({ type: "doc", version: 1, content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
-const saved: PageData = { version: 1, surface: "home", theme: { key: "theme-00", version: "1.4.0" }, sections: [{ id: "saved_text", type: "rich-text", props: { body: doc("Saved words") } }] };
+const saved: PageData = { version: 1, surface: "home", theme: { key: "sellercove", version: "1.4.0" }, sections: [{ id: "saved_text", type: "rich-text", props: { body: doc("Saved words") } }] };
 const draftDocument = {
   version: 1,
   surface: "home",
-  theme: { key: "theme-00", version: "1.4.0" },
+  theme: { key: "sellercove", version: "1.4.0" },
   sections: [
     { id: "draft_text", type: "rich-text", props: { body: doc("Draft words") } },
     { id: "draft_faq", type: "faq", props: { questions: [{ id: "q1", props: { question: "COD?" } }] } },
