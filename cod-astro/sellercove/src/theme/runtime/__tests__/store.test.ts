@@ -179,7 +179,7 @@ describe("resolveStoreRequest() — through the S5 adapter", () => {
     const ctx = await storeFor("/");
 
     // Named by its key, the theme gets the store's edits to its own text.
-    expect(calls).toEqual(["https://api.example.test/store/config?theme=theme-00"]);
+    expect(calls).toEqual(["https://api.example.test/store/config?theme=sellercove"]);
     expect(ctx.config.name).toBe("متجر الجزائر");
     expect(ctx.config.currencySymbol).toBe("دج");
     expect(ctx.isRTL).toBe(true);
@@ -213,7 +213,7 @@ describe("resolveStoreRequest() — through the S5 adapter", () => {
     expect(ctx.fallbackLocales).toEqual(["ar"]);
     expect(ctx.href("/checkout")).toBe("/fr/checkout");
     expect(ctx.href("/")).toBe("/fr");
-    expect(calls).toContain("https://api.example.test/store/config?theme=theme-00&locale=fr");
+    expect(calls).toContain("https://api.example.test/store/config?theme=sellercove&locale=fr");
     const { resolveStoreRequest } = await runtime();
     expect(await resolveStoreRequest(shop("/fr/products/phone?ref=ig"), null)).toMatchObject({ kind: "page", rewrite: "/products/phone?ref=ig" });
     expect(await resolveStoreRequest(shop("/products/phone"), null)).toMatchObject({ kind: "page", rewrite: null });
@@ -343,7 +343,7 @@ describe("resolvePreviewStore() — the store as an editor's draft would leave i
     expect(ctx.content.heroTitle).toBe("Soldes");
     expect(ctx.fallbackLocales).toEqual(["ar"]);
     expect(ctx.href("/products")).toBe("/fr/products");
-    expect(calls).toContain("https://api.example.test/store/config?theme=theme-00&locale=fr");
+    expect(calls).toContain("https://api.example.test/store/config?theme=sellercove&locale=fr");
   });
 
   it("falls back to the primary for a language the store does not serve", async () => {
