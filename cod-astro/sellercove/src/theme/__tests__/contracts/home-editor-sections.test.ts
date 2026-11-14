@@ -217,7 +217,7 @@ describe("an editor composing the home page from the manifest alone", () => {
       if (!edit.ok) throw new Error(`${edit.issue.code}: ${edit.issue.message}`);
       return edit.page;
     };
-    let page = shippedHome as PageData;
+    let page = shippedHome as unknown as PageData;
     page = must(insertInstance(catalog, page, createInstance(catalog.components["image-banner"], "banner"), { index: 1 }));
     page = must(setInstanceProps(catalog, page, "banner", { image: { key: "products/3f2a9c.webp", alt: { ar: "فساتين", fr: "Robes", en: "Dresses" } } }));
     page = must(insertInstance(catalog, page, createInstance(catalog.components.faq, "faq", { questions: [{ id: "q1", props: { question: "COD?" } }] })));
