@@ -39,6 +39,6 @@ export const enOrderForm: OrderFormStrings = {
   formBotCheckFailed: "The security check didn't finish. Wait a moment, then confirm again.",
   formPhoneNotVerified: "We couldn't verify your number. Verify it again to place your order.",
   formSubmit: "Confirm order",
-  formConfirmNote: "Our team will call to confirm your order within 24 hours",
+  formConfirmNote: "Please make sure your contact details are correct so the store can confirm your order.",
 
 };
