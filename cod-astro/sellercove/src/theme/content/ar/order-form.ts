@@ -39,6 +39,6 @@ export const arOrderForm: OrderFormStrings = {
   formBotCheckFailed: "لم يكتمل التحقق الأمني. انتظر لحظة ثم أكّد الطلب من جديد.",
   formPhoneNotVerified: "تعذّر تأكيد رقم هاتفك. أكّده من جديد لإتمام الطلب.",
   formSubmit: "تأكيد الطلب",
-  formConfirmNote: "سيتصل بك فريقنا لتأكيد طلبك خلال 24 ساعة",
+  formConfirmNote: "يرجى التأكد من صحة معلومات الاتصال لتأكيد طلبك.",
 
 };
