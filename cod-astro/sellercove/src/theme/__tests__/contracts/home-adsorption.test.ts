@@ -153,7 +153,6 @@ describe("home adsorption — the shipped document", () => {
       "hero",
       "category-cards",
       "featured-products",
-      "rich-text",
       "how-it-works",
       "features-bar",
     ]);
@@ -175,14 +174,11 @@ describe("home adsorption — copy (contentKey bridge)", () => {
     const { client } = createStorefrontStub();
     const { render } = createHarness(client);
     const hero = await render(shippedSection("hero"));
-    const story = await render(shippedSection("rich-text"));
     const how = await render(shippedSection("how-it-works"));
     const features = await render(shippedSection("features-bar"));
     const promo = await render(inserted("whatsapp-cta"));
     expect(decode(hero)).toContain(en.heroTitle);
     expect(decode(hero)).toContain(en.heroCtaPrimary);
-    expect(decode(story)).toContain("A more considered way to shop");
-    expect(decode(story)).toContain("A good store should make decisions easier.");
     expect(decode(how)).toContain(en.howItWorksTitle);
     expect(decode(how)).toContain(en.howStep1Title);
     expect(decode(features)).toContain(en.feature1Title);
@@ -294,7 +290,6 @@ describe("home adsorption — the full page", () => {
       en.heroTitle,
       en.categoriesSection,
       en.featuredSection,
-      "A more considered way to shop",
       en.howItWorksTitle,
       en.feature1Title,
     ];
