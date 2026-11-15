@@ -39,6 +39,6 @@ export const frOrderForm: OrderFormStrings = {
   formBotCheckFailed: "La vérification de sécurité n'a pas abouti. Patientez un instant, puis confirmez à nouveau.",
   formPhoneNotVerified: "Votre numéro n'a pas pu être vérifié. Vérifiez-le à nouveau pour commander.",
   formSubmit: "Confirmer la commande",
-  formConfirmNote: "Notre équipe vous contactera pour confirmer votre commande dans les 24 heures",
+  formConfirmNote: "Vérifiez vos coordonnées afin que la boutique puisse confirmer votre commande.",
 
 };
