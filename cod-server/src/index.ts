@@ -200,7 +200,7 @@ function oauthProviderOptions(env: Env): OAuthProviderOptions<Env> {
     scopesSupported: ALL_SCOPES,
     resourceMetadata: {
       resource: new URL("/mcp", resourceOrigin).toString(),
-      authorization_servers: [resourceOrigin.origin],
+      authorization_servers: resourceOrigin.protocol === "https:" ? [resourceOrigin.origin] : undefined,
       scopes_supported: ALL_SCOPES,
       resource_name: "CodFlow MCP",
     },
