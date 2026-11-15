@@ -29,7 +29,7 @@
         "collection": "featured",
         "limit": 8,
         "showViewAll": true,
-        "layout": "carousel",
+        "layout": "grid",
         "columns": 4,
         "headingAlign": "start",
         "scheme": "scheme-1"
