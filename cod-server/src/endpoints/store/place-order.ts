@@ -82,11 +82,14 @@ export interface OrderToCommit {
   userAgent: string | undefined;
   /** Keeps the number the shopper already holds, when one exists. */
   orderNumber?: string;
+  /** Product ids in the priced basket, including offer rewards; used to preflight seller ownership before customer creation. */
+  marketplaceProductIds: string[];
 }
 
 /** Writes the customer and the order. A concurrent request of the same checkout answers with `replay`. */
 export async function commitOrder(db: AppDb, input: OrderToCommit) {
   const { data } = input;
+  await queries.assertMarketplaceSeller(db, input.snapshot, input.marketplaceProductIds);
   const customer = await queries.findOrCreateCustomer(db, {
     phone: data.phone,
     name: data.customerName,
