@@ -759,7 +759,7 @@ export const companyApiLogs = sqliteTable("company_api_logs", {
  */
 export const shipments = sqliteTable("shipments", {
   id: text("id").primaryKey(),
-  orderId: text("order_id").notNull().unique().references(() => orders.id, { onDelete: "cascade" }),
+  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
   kind: text("kind", { enum: SHIPMENT_KINDS }).notNull(),
   companyId: text("company_id").references(() => deliveryCompanies.id),
   driverId: text("driver_id").references(() => drivers.id),
@@ -1014,6 +1014,8 @@ export const sellerOrders = sqliteTable("seller_orders", {
   total: integer("total").notNull(),
   createdAt: text("created_at").notNull(),
 }, (t) => ({
+  parentSellerUnique: uniqueIndex("seller_orders_parent_seller_unique").on(t.orderId, t.sellerId),
+  parent: index("seller_orders_parent_idx").on(t.orderId),
   sellerCreated: index("seller_orders_seller_created_idx").on(t.sellerId, t.createdAt),
 }));
 
