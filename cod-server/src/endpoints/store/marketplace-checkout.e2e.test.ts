@@ -40,6 +40,9 @@ beforeEach(async () => {
     id: STORE, name: "SellerCove Test", lang: "ar", currency: "DZD",
     createdAt: T, updatedAt: T,
   });
+  await d1.db.insert(schema.storeLocales).values({
+    storeId: STORE, locale: "ar", published: true, createdAt: T,
+  });
   await d1.db.insert(schema.shippingProfiles).values({
     id: "market-default", name: "Default", isDefault: true, createdAt: T, updatedAt: T,
   });
