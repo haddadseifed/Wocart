@@ -690,14 +690,13 @@ export async function getStoreProductByHandle(
     eq(products.handle, handle),
     eq(products.status, "ACTIVE"),
     eq(products.visibility, true),
-  // Before the first seller is approved this remains a legacy single-store
+  // Before any seller record exists this remains a legacy single-store
   // catalogue. Once marketplace operations are active, only products owned
   // by an approved seller are public; unassigned legacy rows are hidden.
   sql`(
     (${products.sellerId} IS NULL AND NOT EXISTS (
       SELECT 1 FROM sellers active_seller
-      WHERE active_seller.status = 'approved'
-        AND active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+      WHERE active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
     ))
     OR EXISTS (
       SELECT 1 FROM sellers s
