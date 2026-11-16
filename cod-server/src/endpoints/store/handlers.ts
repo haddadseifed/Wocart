@@ -432,7 +432,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
     if (error instanceof queries.SellerCheckoutUnavailableError) {
       throw new BusinessLogicError(
         "The selected seller is not available for this checkout, or the basket contains products from different sellers",
-        ERROR_CODES.PRODUCT_NOT_FOUND,
+        ERROR_CODES.SELLER_NOT_AVAILABLE,
       );
     }
     throw error;
