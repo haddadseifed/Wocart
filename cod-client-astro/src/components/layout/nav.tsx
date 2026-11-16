@@ -97,6 +97,12 @@ export function useNavSections(): NavSection[] {
             },
           ],
         },
+        ...(identity?.role === "staff" ? [{
+          kind: "leaf" as const,
+          href: "/seller/orders",
+          label: tN("sidebar.seller_orders"),
+          icon: Inbox,
+        }] : []),
         {
           kind: "group",
           id: "products",
