@@ -136,6 +136,20 @@ describe("SellerCove marketplace checkout", () => {
     expect(stock?.inventory).toBe(1);
   });
 
+  it("hides unassigned legacy products from the public catalogue after marketplace activation", async () => {
+    await d1.db.insert(schema.products).values({
+      id: "legacy-item", sellerId: null, name: "Unassigned legacy item", handle: "legacy-item",
+      price: 700, sku: "LEGACY-1", status: "ACTIVE", visibility: true,
+      showInStore: true, trackInventory: true, inventory: 4,
+      createdAt: T, updatedAt: T,
+    });
+    const response = await app.request("/store/products");
+    const body = await response.json() as any;
+    expect(response.status).toBe(200);
+    expect(body.data.map((product: { id: string }) => product.id)).toContain("item-a");
+    expect(body.data.map((product: { id: string }) => product.id)).not.toContain("legacy-item");
+  });
+
   it("refuses an unassigned legacy product once an approved marketplace seller exists", async () => {
     await d1.db.insert(schema.products).values({
       id: "legacy-item", sellerId: null, name: "Unassigned legacy item", handle: "legacy-item",
