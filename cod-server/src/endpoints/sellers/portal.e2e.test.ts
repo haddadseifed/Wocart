@@ -7,10 +7,12 @@ import { openApiValidationHook } from "@/openapi/validation-hook";
 import { createTestD1, type TestD1 } from "@/test-utils/d1";
 import * as schema from "@/db/schema";
 import portalRoutes from "./portal";
+import sellerAdminRoutes from "./routes";
 
 let d1: TestD1;
 let app: OpenAPIHono<AppContext>;
 let currentUserId = "seller-user-a";
+let currentRole: "admin" | "staff" = "staff";
 const STORE = "seller-portal-store";
 const T = "2026-11-16T10:00:00.000Z";
 
@@ -21,18 +23,20 @@ beforeAll(async () => {
     c.env = { DB: d1.raw } as never;
     c.set("user", {
       id: currentUserId, name: currentUserId, email: `${currentUserId}@example.test`,
-      role: "staff", status: "active", scopes: [], language: "ar",
+      role: currentRole, status: "active", scopes: [], language: "ar",
       createdAt: Date.now(), updatedAt: Date.now(),
     } as any);
     await next();
   });
   app.onError(errorHandler);
   app.route("/seller", portalRoutes);
+  app.route("/admin/sellers", sellerAdminRoutes);
 }, 120_000);
 
 afterAll(async () => d1?.dispose());
 
 beforeEach(async () => {
+  currentRole = "staff";
   for (const table of [
     "seller_order_items", "seller_orders", "order_products", "orders",
     "customers", "seller_memberships", "sellers", "users", "stores",
@@ -113,6 +117,29 @@ describe("seller portal order isolation", () => {
     const body = await response.json() as any;
     expect(response.status).toBe(200);
     expect(body.data).toHaveLength(1);
+  });
+
+  it("lets an admin reactivate an existing membership for an existing active user", async () => {
+    currentRole = "admin";
+    await d1.db.update(schema.sellerMemberships).set({ status: "suspended" }).where(eq(schema.sellerMemberships.id, "membership-a"));
+    const response = await app.request("/admin/sellers/seller-a/memberships", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: "seller-user-a", role: "orders" }),
+    });
+    const body = await response.json() as any;
+    expect(response.status).toBe(200);
+    expect(body.data).toMatchObject({ sellerId: "seller-a", userId: "seller-user-a", role: "orders", status: "active" });
+  });
+
+  it("does not let staff assign seller memberships", async () => {
+    currentRole = "staff";
+    const response = await app.request("/admin/sellers/seller-a/memberships", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: "seller-user-a", role: "orders" }),
+    });
+    expect(response.status).toBe(403);
   });
 
   it("revokes seller portal access when the membership is suspended", async () => {
