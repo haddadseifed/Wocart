@@ -127,7 +127,7 @@ describe("address", () => {
     // container would make the form unsubmittable for stop-desk orders; the
     // toggle restores the requirement only while home delivery is selected.
     const html = await render({ address: "required" });
-    expect(html).toMatch(/<input[^>]*id="f-address"[^>]*required/);
+    expect(html).toMatch(/<textarea[^>]*id="f-address"[^>]*required/);
     expect(html).toContain('data-address-required="true"');
   });
 
