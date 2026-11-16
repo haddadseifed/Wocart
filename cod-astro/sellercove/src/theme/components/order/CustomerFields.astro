@@ -204,8 +204,8 @@ const wilayaOptions = WILAYAS.map((w) => ({
     <div id="address-field-container" class="field">
       <label for="f-address" class="sr-only">{content.formAddressLabel}</label>
       <Icon name="heroicons:map-pin" class="field-icon" aria-hidden="true" />
-      <input
-        id="f-address" type="text" name="address"
+      <textarea
+        id="f-address" name="address" rows="2"
         autocomplete="street-address"
         required={addressRequired || undefined}
         data-address-required={addressRequired ? "true" : undefined}
@@ -213,9 +213,11 @@ const wilayaOptions = WILAYAS.map((w) => ({
           ? `${content.formAddressLabel} *`
           : content.formAddressPlaceholder}
         class:list={["form-input", fieldErrors.address && "error"]}
-      />
+        aria-invalid={fieldErrors.address ? "true" : undefined}
+        aria-describedby={fieldErrors.address ? "f-address-error" : undefined}
+      ></textarea>
       {fieldErrors.address && (
-        <p class="field-error">{fieldErrors.address[0]}</p>
+        <p id="f-address-error" class="field-error">{fieldErrors.address[0]}</p>
       )}
     </div>
   )}
