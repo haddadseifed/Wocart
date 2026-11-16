@@ -1,6 +1,8 @@
 import { Context } from "hono";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
+import { sellers, stores } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 import * as queries from "./queries";
 import * as validation from "./validation";
 import { logActivity, ACTIONS } from "@/lib/activity";
@@ -9,6 +11,18 @@ import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 import { removeProduct } from "@/lib/remove-product";
 import { mediaDeliveryOf } from "@/lib/media";
 import { checkProductCollections, withCollections } from "@/lib/product-collections";
+
+async function assertApprovedSeller(db: ReturnType<typeof getDb>, sellerId: string | null | undefined) {
+  if (sellerId === undefined || sellerId === null) return;
+  const store = await db.select({ id: stores.id }).from(stores).limit(1).get();
+  if (!store) throw new NotFoundError("Store");
+  const seller = await db.select({ id: sellers.id }).from(sellers)
+    .where(and(eq(sellers.id, sellerId), eq(sellers.storeId, store.id), eq(sellers.status, "approved")))
+    .get();
+  if (!seller) throw new ValidationError("Products can only be assigned to an approved seller in this store", ERROR_CODES.VALIDATION_FAILED, {
+    fields: [{ path: "sellerId", message: "Choose an approved seller in this store", code: "custom" }],
+  });
+}
 
 async function checkedCollections(db: ReturnType<typeof getDb>, collectionIds: readonly string[] | undefined) {
   const check = await checkProductCollections(db, collectionIds);
@@ -53,6 +67,7 @@ export async function createProduct(c: Context<AppContext>) {
   const jsonData: any = (c.req as any).valid?.("json");
   const { collectionIds, ...validated } = jsonData ?? validation.createProductSchema.parse(await c.req.json());
   const applyCollections = await checkedCollections(db, collectionIds);
+  await assertApprovedSeller(db, validated.sellerId);
 
   // Identity pre-check: a 409 naming the field, before the unique index answers.
   const conflict = await queries.findProductIdentityConflict(db, {
@@ -112,6 +127,7 @@ export async function updateProduct(c: Context<AppContext>) {
   const jsonData: any = (c.req as any).valid?.("json");
   const { collectionIds, ...validated } = jsonData ?? validation.updateProductSchema.parse(await c.req.json());
   const applyCollections = await checkedCollections(db, collectionIds);
+  await assertApprovedSeller(db, validated.sellerId);
 
   // A product without options is ordered by its own SKU: turning its options
   // off, or leaving them off, without one would make it unorderable.

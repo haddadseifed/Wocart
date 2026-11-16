@@ -13,7 +13,7 @@ import { TEST_DELIVERY } from "@/test-utils/media";
 
 /** The listing's product row: its public columns in the select's order, then the review aggregates — the mock db maps a select by position. */
 function listedRow(overrides: Record<string, unknown>, review: { avg_rating: number | null; review_count: number }) {
-  const { cost_price: _cost, visibility: _v, status: _s, show_in_store: _shown, published_at: _p, shipping_profile_id: _ship, created_at: _c, updated_at: _u, meta_title, meta_description, ...rest } = productRow(overrides);
+  const { cost_price: _cost, visibility: _v, status: _s, show_in_store: _shown, published_at: _p, shipping_profile_id: _ship, seller_id: _seller, created_at: _c, updated_at: _u, meta_title, meta_description, ...rest } = productRow(overrides);
   return { ...rest, meta_title, meta_description, ...review };
 }
 

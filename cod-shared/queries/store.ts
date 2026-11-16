@@ -453,7 +453,19 @@ function nameLike(pattern: string, locale: StoreLocale | null) {
 }
 
 /** The gates every storefront listing applies: active, shown in the store, visible. */
-const listable = () => [eq(products.showInStore, true), eq(products.status, "ACTIVE"), eq(products.visibility, true)];
+const listable = () => [
+  eq(products.showInStore, true),
+  eq(products.status, "ACTIVE"),
+  eq(products.visibility, true),
+  // Legacy unassigned products remain compatible. Attributed products are
+  // public only while their seller remains approved for this store.
+  sql`(${products.sellerId} IS NULL OR EXISTS (
+    SELECT 1 FROM sellers s
+    WHERE s.id = ${products.sellerId}
+      AND s.status = 'approved'
+      AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+  ))`,
+];
 
 /** What a storefront listing selects, joins and orders by, shared by its page and its count. */
 function storeProductsQuery(params: StoreProductsParams, locale: StoreLocale | null) {
@@ -622,6 +634,12 @@ export async function getStoreProductByHandle(
     eq(products.handle, handle),
     eq(products.status, "ACTIVE"),
     eq(products.visibility, true),
+    sql`(${products.sellerId} IS NULL OR EXISTS (
+      SELECT 1 FROM sellers s
+      WHERE s.id = ${products.sellerId}
+        AND s.status = 'approved'
+        AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    ))`,
   ];
   if (!opts.allowUnlisted) conditions.push(eq(products.showInStore, true));
 

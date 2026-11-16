@@ -7,6 +7,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { bundleWorker, createTestD1, type TestD1 } from "@/test-utils/d1";
 
 const STORE_ID = "store-1";
@@ -109,6 +110,30 @@ describe("a product's search-engine title and description", () => {
     expect((await request("/store/products/robe")).body.data).toMatchObject({ metaTitle: "فستان صيفي", metaDescription: "وصف بالعربية" });
   });
 
+  it("requires an approved seller for attribution and hides listings after seller suspension", async () => {
+    await harness.db.insert(schema.sellers).values({
+      id: "seller-approved", storeId: STORE_ID, name: "Seller approved", slug: "seller-approved",
+      status: "approved", approvedAt: now(), createdAt: now(), updatedAt: now(),
+    });
+    const created = await create({ sellerId: "seller-approved" });
+    expect(created.status).toBe(201);
+    expect(created.body.data.sellerId).toBe("seller-approved");
+    expect((await request("/store/products")).body.data).toHaveLength(1);
+    expect((await request("/store/products/robe")).status).toBe(200);
+    await harness.db.update(schema.sellers).set({ status: "suspended", updatedAt: now() })
+      .where(eq(schema.sellers.id, "seller-approved"));
+    expect((await request("/store/products")).body.data).toHaveLength(0);
+    expect((await request("/store/products/robe")).status).toBe(404);
+  });
+
+  it("rejects assigning a product to a pending seller", async () => {
+    await harness.db.insert(schema.sellers).values({
+      id: "seller-pending", storeId: STORE_ID, name: "Seller pending", slug: "seller-pending",
+      status: "pending", createdAt: now(), updatedAt: now(),
+    });
+    const refused = await create({ sellerId: "seller-pending" });
+    expect([400, 422]).toContain(refused.status);
+  });
   it("refuse a translation past the same lengths", async () => {
     const { body } = await create({});
     const refused = await request(`/api/products/${body.data.id}/translations`, { method: "PATCH", body: { locale: "fr", values: { metaTitle: "x".repeat(61) } } });

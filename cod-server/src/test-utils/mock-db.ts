@@ -253,6 +253,7 @@ export function productRow(overrides: Record<string, unknown> = {}): Record<stri
     updated_at: NOW,
     meta_title: null,
     meta_description: null,
+    seller_id: null,
     ...overrides,
   };
 }

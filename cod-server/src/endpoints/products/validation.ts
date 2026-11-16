@@ -45,6 +45,7 @@ export const createProductSchema = z.object({
   shippingProfileId: z.string().optional().nullable(),
   metaTitle: seoText(SEO_TEXT.titleMax),
   metaDescription: seoText(SEO_TEXT.descriptionMax),
+  sellerId: z.string().min(1).nullable().optional(),
 }).superRefine((data, ctx) => {
   if (!data.hasVariants && !data.sku) {
     ctx.addIssue({
@@ -80,6 +81,7 @@ export const updateProductSchema = z.object({
   shippingProfileId: z.string().optional().nullable(),
   metaTitle: seoText(SEO_TEXT.titleMax),
   metaDescription: seoText(SEO_TEXT.descriptionMax),
+  sellerId: z.string().min(1).nullable().optional(),
 });
 
 export const updateStatusSchema = z.object({

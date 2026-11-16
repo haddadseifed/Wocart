@@ -603,6 +603,8 @@ export const products = sqliteTable("products", {
   metaTitle: text("meta_title"),
   /** The description search engines and shared links show; null: the product's own description, shortened. */
   metaDescription: text("meta_description"),
+  /** Approved marketplace seller responsible for this listing; null for legacy/unassigned catalogue rows. */
+  sellerId: text("seller_id").references(() => sellers.id, { onDelete: "set null" }),
 });
 
 export const productVariants = sqliteTable("product_variants", {
@@ -958,6 +960,44 @@ export const stores = sqliteTable("stores", {
   /** The share image's Media Key. */
   ogImageKey: text("og_image_key"),
 });
+
+/**
+ * Marketplace sellers are independent merchants operating inside a store.
+ * Approval is explicit; legacy products remain unassigned until reviewed.
+ */
+export const sellers = sqliteTable("sellers", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  logoKey: text("logo_key"),
+  contactPhone: text("contact_phone"),
+  contactEmail: text("contact_email"),
+  status: text("status", { enum: ["pending", "approved", "suspended", "rejected"] }).notNull().default("pending"),
+  approvedAt: text("approved_at"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (t) => ({
+  storeSlugUnique: uniqueIndex("sellers_store_slug_unique").on(t.storeId, t.slug),
+  storeStatus: index("sellers_store_status_idx").on(t.storeId, t.status),
+}));
+
+/**
+ * A user may belong to a seller with a narrowly-scoped operational role.
+ * These memberships are not a substitute for route-level authorization.
+ */
+export const sellerMemberships = sqliteTable("seller_memberships", {
+  id: text("id").primaryKey(),
+  sellerId: text("seller_id").notNull().references(() => sellers.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["owner", "manager", "catalog", "orders"] }).notNull(),
+  status: text("status", { enum: ["active", "suspended"] }).notNull().default("active"),
+  createdAt: text("created_at").notNull(),
+}, (t) => ({
+  sellerUserUnique: uniqueIndex("seller_memberships_seller_user_unique").on(t.sellerId, t.userId),
+  userStatus: index("seller_memberships_user_status_idx").on(t.userId, t.status),
+}));
 
 /**
  * The languages a store has added (ADR 0005, migration 0036) — Shopify's
