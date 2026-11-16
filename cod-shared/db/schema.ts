@@ -759,7 +759,7 @@ export const companyApiLogs = sqliteTable("company_api_logs", {
  */
 export const shipments = sqliteTable("shipments", {
   id: text("id").primaryKey(),
-  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  orderId: text("order_id").notNull().unique().references(() => orders.id, { onDelete: "cascade" }),
   kind: text("kind", { enum: SHIPMENT_KINDS }).notNull(),
   companyId: text("company_id").references(() => deliveryCompanies.id),
   driverId: text("driver_id").references(() => drivers.id),
@@ -1001,12 +1001,12 @@ export const sellerMemberships = sqliteTable("seller_memberships", {
 
 /**
  * A marketplace seller's portion of one parent checkout. The first rollout
- * intentionally permits one seller per checkout; the parent order remains
+ * permits one seller per checkout in application logic; the schema supports
  * the buyer-facing order and this row is the seller-scoped work item.
  */
 export const sellerOrders = sqliteTable("seller_orders", {
   id: text("id").primaryKey(),
-  orderId: text("order_id").notNull().unique().references(() => orders.id, { onDelete: "cascade" }),
+  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
   sellerId: text("seller_id").notNull().references(() => sellers.id, { onDelete: "restrict" }),
   orderNumber: text("order_number").notNull().unique(),
   subtotal: integer("subtotal").notNull(),
