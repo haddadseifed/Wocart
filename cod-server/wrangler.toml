@@ -1,0 +1,63 @@
+# Local-only SellerCove development worker. No production environment or deploy bindings.
+name = "sellercove-local-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "codflow-os-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "src/db/migrations"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "sellercove-local-media"
+
+[images]
+binding = "IMAGE_TRANSFORM"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "00000000000000000000000000000000"
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "00000000000000000000000000000001"
+
+[[workflows]]
+name = "sellercove-local-lp-image-upload"
+binding = "LP_IMAGE_UPLOAD_WORKFLOW"
+class_name = "CodLandingPageImageUploadWorkflow"
+
+[[workflows]]
+name = "sellercove-local-review-media"
+binding = "REVIEW_MEDIA_WORKFLOW"
+class_name = "CodReviewMediaWorkflow"
+
+[[queues.producers]]
+binding = "EVENTS_QUEUE"
+queue = "sellercove-local-events"
+
+[[queues.consumers]]
+queue = "sellercove-local-events"
+max_batch_size = 1
+max_retries = 3
+
+[[ratelimits]]
+name = "REVIEW_RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[vars]
+ENVIRONMENT = "development"
+WORKER_URL = "http://localhost:8787"
+MEDIA_HOST = "r2"
+MEDIA_DELIVERY = "direct"
+MEDIA_ORIGIN = "http://localhost:8787/media"
+BETTER_AUTH_URL = "http://localhost:4321/api/auth"
+WORKER_SELF_URL = "http://localhost:8787/"
+ALLOWED_ORIGINS = "*"
+
+[dev]
+port = 8787
