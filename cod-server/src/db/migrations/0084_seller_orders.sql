@@ -28,13 +28,4 @@ CREATE INDEX seller_order_items_order_idx ON seller_order_items (seller_order_id
 -- A seller may be suspended between catalogue display and checkout. The
 -- database is the final guard at commit time; this trigger rolls back the
 -- entire D1 batch (parent order, lines and stock deductions included).
-CREATE TRIGGER seller_orders_require_approved
-BEFORE INSERT ON seller_orders
-FOR EACH ROW
-WHEN NOT EXISTS (
-  SELECT 1 FROM sellers
-  WHERE id = NEW.seller_id AND status = 'approved'
-)
-BEGIN
-  SELECT RAISE(ABORT, 'SELLER_NOT_APPROVED');
-END;
+CREATE TRIGGER seller_orders_require_approved BEFORE INSERT ON seller_orders FOR EACH ROW WHEN NOT EXISTS (SELECT 1 FROM sellers WHERE id = NEW.seller_id AND status = 'approved') BEGIN SELECT RAISE(ABORT, 'SELLER_NOT_APPROVED'); END;
