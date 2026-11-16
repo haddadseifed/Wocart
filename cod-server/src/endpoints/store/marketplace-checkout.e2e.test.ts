@@ -95,7 +95,7 @@ describe("SellerCove marketplace checkout", () => {
     expect(children).toHaveLength(1);
     expect(children[0]).toMatchObject({
       orderId: parents[0]!.id, sellerId: "seller-a",
-      subtotal: 4300, deliveryFee: 600, total: 4900,
+      subtotal: 4300, deliveryFee: 600, codAmount: 4900,
     });
     expect(lines).toHaveLength(2);
   });
