@@ -100,6 +100,7 @@ function SellerOrdersContent() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><p className="text-muted-foreground">{t("customer")}</p><p className="mt-1 font-medium">{selected.customerName}</p></div>
                   <div><p className="text-muted-foreground">{t("phone")}</p><a className="mt-1 block font-medium underline" href={`tel:${selected.phone}`} dir="ltr">{selected.phone}</a></div>
+                  <div><p className="text-muted-foreground">{t("delivery_type")}</p><p className="mt-1 font-medium">{t(selected.deliveryType === "stop_desk" ? "stop_desk" : "home")}</p></div>
                   <div className="col-span-2"><p className="text-muted-foreground">{t("address")}</p><p className="mt-1 font-medium">{selected.address || "—"}</p></div>
                 </div>
                 <div className="border-t border-border pt-3">
