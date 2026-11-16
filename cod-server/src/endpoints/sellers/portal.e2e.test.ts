@@ -106,6 +106,15 @@ describe("seller portal order isolation", () => {
     expect(response.status).toBe(403);
   });
 
+  it("keeps historical order access when the seller profile is suspended", async () => {
+    currentUserId = "seller-user-a";
+    await d1.db.update(schema.sellers).set({ status: "suspended" }).where(eq(schema.sellers.id, "seller-a"));
+    const response = await app.request("/seller/orders");
+    const body = await response.json() as any;
+    expect(response.status).toBe(200);
+    expect(body.data).toHaveLength(1);
+  });
+
   it("revokes seller portal access when the membership is suspended", async () => {
     currentUserId = "seller-user-a";
     await d1.db.update(schema.sellerMemberships).set({ status: "suspended" }).where(eq(schema.sellerMemberships.id, "membership-a"));
