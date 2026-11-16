@@ -1,66 +1,63 @@
 /**
- * CORS Middleware
- * 
- * Handles Cross-Origin Resource Sharing for client requests.
- * In production, restricts origins to the configured ALLOWED_ORIGINS list.
- * In development, allows all origins for easier local testing.
+ * CORS middleware.
+ *
+ * Browser origins must be explicitly listed in ALLOWED_ORIGINS in every
+ * environment. Requests without an Origin header (for example server-to-server
+ * calls) are not subject to CORS and continue through the normal auth stack.
  */
-
 import { Context, Next } from "hono";
 import type { AppContext } from "@/types/app";
 
+const ALLOW_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+const ALLOW_HEADERS = "Content-Type, X-API-Key, X-Store-API-Key, Accept, Authorization";
+
 export async function corsMiddleware(c: Context<AppContext>, next: Next) {
-  const env = c.env;
   const requestOrigin = c.req.header("origin");
-  
-  // Determine allowed origins based on environment
-  let allowedOrigin = "*";
-  
-  if (env.ENVIRONMENT === "production" && env.ALLOWED_ORIGINS) {
-    // In production, validate against whitelist
-    const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map(o => o.trim());
-    
-    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-      allowedOrigin = requestOrigin;
-    } else {
-      // Default to first allowed origin if request origin doesn't match
-      allowedOrigin = allowedOrigins[0] || "*";
-    }
-  } else if (requestOrigin) {
-    // In development, echo back the request origin (allows localhost on any port)
-    allowedOrigin = requestOrigin;
+
+  // CORS is a browser access policy, not authentication. Preserve requests
+  // without Origin and let the existing authentication middleware decide.
+  if (!requestOrigin) {
+    if (c.req.method === "OPTIONS") return c.body(null, 204);
+    return next();
+  }
+
+  const allowedOrigins = (c.env.ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const originAllowed = allowedOrigins.includes(requestOrigin);
+
+  // A disallowed preflight must fail before the browser sends the actual
+  // request. For other methods, keep the API's normal response/auth behavior
+  // but deliberately omit CORS headers so browsers cannot read the response.
+  if (!originAllowed) {
+    if (c.req.method === "OPTIONS") return c.body(null, 403);
+    return next();
   }
 
   const applyCorsHeaders = () => {
-    c.header("Access-Control-Allow-Origin", allowedOrigin);
-    c.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    c.header("Access-Control-Allow-Headers", "Content-Type, X-API-Key, X-Store-API-Key, Accept, Authorization");
+    c.header("Access-Control-Allow-Origin", requestOrigin);
+    c.header("Access-Control-Allow-Methods", ALLOW_METHODS);
+    c.header("Access-Control-Allow-Headers", ALLOW_HEADERS);
     c.header("Access-Control-Expose-Headers", "Content-Type, X-API-Key, X-Store-API-Key");
     c.header("Access-Control-Max-Age", "86400");
-
-    // Only set credentials header if origin is specific (not *)
-    if (allowedOrigin !== "*") {
-      c.header("Access-Control-Allow-Credentials", "true");
-    }
+    c.header("Access-Control-Allow-Credentials", "true");
+    c.header("Vary", "Origin");
   };
 
-  applyCorsHeaders();
-
-  // Handle preflight requests
   if (c.req.method === "OPTIONS") {
     return c.body(null, 204, {
-      "Access-Control-Allow-Origin": allowedOrigin,
-      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-API-Key, X-Store-API-Key, Accept, Authorization",
+      "Access-Control-Allow-Origin": requestOrigin,
+      "Access-Control-Allow-Methods": ALLOW_METHODS,
+      "Access-Control-Allow-Headers": ALLOW_HEADERS,
       "Access-Control-Max-Age": "86400",
+      "Access-Control-Allow-Credentials": "true",
+      Vary: "Origin",
     });
   }
 
+  applyCorsHeaders();
   await next();
-
-  // Handlers that return a raw `new Response(...)` (streamed PDFs, R2 objects)
-  // bypass Hono's prepared-header application, so the headers set before
-  // `next()` never reach them — re-apply on the final response.
+  // Preserve headers on handlers returning a raw Response.
   applyCorsHeaders();
 }
-
