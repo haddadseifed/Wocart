@@ -11,6 +11,7 @@
     "db:migrate:local": "node scripts/d1.mjs migrations apply --local --persist-to ../.wrangler-shared",
     "db:migrate:remote": "node scripts/d1.mjs migrations apply --remote",
     "db:seed:local": "npx tsx scripts/seed-store.ts",
+    "db:seed:sellercove:local": "node scripts/seed-sellercove-demo.mjs",
     "db:setup:local": "npm run db:migrate:local && npm run db:seed:local",
     "db:seed:remote": "npx tsx scripts/seed-store.ts --remote",
     "db:setup:remote": "npm run db:migrate:remote && npm run db:seed:remote",
