@@ -3,7 +3,7 @@
 -- This migration is additive and does not infer ownership for legacy orders.
 CREATE TABLE seller_orders (
   id TEXT PRIMARY KEY NOT NULL,
-  order_id TEXT NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   seller_id TEXT NOT NULL REFERENCES sellers(id) ON DELETE RESTRICT,
   order_number TEXT NOT NULL UNIQUE,
   subtotal INTEGER NOT NULL CHECK (subtotal >= 0),
@@ -12,6 +12,8 @@ CREATE TABLE seller_orders (
   created_at TEXT NOT NULL
 );
 
+CREATE UNIQUE INDEX seller_orders_parent_seller_unique ON seller_orders (order_id, seller_id);
+CREATE INDEX seller_orders_parent_idx ON seller_orders (order_id);
 CREATE INDEX seller_orders_seller_created_idx ON seller_orders (seller_id, created_at);
 
 CREATE TABLE seller_order_items (
