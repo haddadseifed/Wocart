@@ -31,12 +31,16 @@ and add only the missing local values rather than replacing it.
    `STORE_API_KEY=codflow-dev-store-key` and
    `COD_SERVER_URL=http://localhost:8787`.
 3. `cod-client-astro/.dev.vars`: set a unique local-only
-   `BETTER_AUTH_SECRET` (at least 32 characters) and
-   `PUBLIC_API_URL` to the Codespaces forwarded URL for port 8787.
-   The latter is a browser-facing URL: **do not use localhost here when opening
-   the dashboard on your phone**. Get the URL from the Codespaces Ports panel.
+   `BETTER_AUTH_SECRET` (at least 32 characters), then set all three public
+   origins from the Codespaces Ports panel:
+   - `PUBLIC_APP_URL`: the forwarded URL for port 4321 (dashboard origin).
+   - `PUBLIC_TRUSTED_ORIGINS`: the same port-4321 origin, with no path.
+   - `PUBLIC_API_URL`: the forwarded URL for port 8787 (API origin).
+   These are browser-facing origins: **do not use localhost for them when
+   opening the dashboard on your phone**. The local dashboard config also binds
+   `RATE_LIMIT_KV`; Wrangler stores that namespace in the shared local state.
    Keep port 8787 private; Codespaces authentication protects the forwarded URL.
-   `PUBLIC_API_URL` is not a secret, but it must be reachable from the phone.
+   These public URLs are not secrets, but they must be reachable from the phone.
 
 The dashboard signs users in at `/sign-in`. The dashboard obtains a short-lived
 JWT from its own same-origin auth endpoint, then the browser sends that JWT to
