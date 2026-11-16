@@ -151,6 +151,8 @@ describe("SellerCove marketplace checkout", () => {
     expect(response.status).toBe(200);
     expect(body.data.map((product: { id: string }) => product.id)).toContain("item-a");
     expect(body.data.map((product: { id: string }) => product.id)).not.toContain("legacy-item");
+    const detail = await app.request("/store/products/legacy-item");
+    expect(detail.status).toBe(404);
   });
 
   it("refuses an unassigned legacy product once an approved marketplace seller exists", async () => {
