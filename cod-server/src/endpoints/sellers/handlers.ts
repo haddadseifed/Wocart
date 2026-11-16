@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
-import { stores, sellers, sellerMemberships, users } from "@/db/schema";
+import { stores, sellerMemberships, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { BusinessLogicError, ConflictError, NotFoundError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
@@ -73,7 +73,7 @@ export async function createSellerMembership(c: Context<AppContext>) {
   const seller = await queries.getSellerById(db, storeId, sellerId);
   if (!seller) throw new NotFoundError("Seller", sellerId);
   if (seller.status !== "approved") {
-    throw new BusinessLogicError("Only an approved seller can receive portal memberships", ERROR_CODES.PRODUCT_NOT_FOUND, { sellerId });
+    throw new BusinessLogicError("Only an approved seller can receive portal memberships", ERROR_CODES.SELLER_NOT_AVAILABLE, { sellerId });
   }
 
   const user = await db.select({ id: users.id, status: users.status }).from(users).where(eq(users.id, body.userId)).get();
