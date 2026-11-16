@@ -85,6 +85,8 @@ describe("SellerCove marketplace checkout", () => {
     ], { checkoutKey: KEY });
     expect(result.status).toBe(201);
     expect(result.body.data).toMatchObject({ price: 4300, deliveryFee: 600, total: 4900 });
+    expect(result.body.data.orderNumber).toEqual(expect.any(String));
+    expect(result.body.data.orderNumber.length).toBeGreaterThan(0);
 
     const parents = await d1.db.select().from(schema.orders).all();
     const children = await d1.db.select().from(schema.sellerOrders).all();
