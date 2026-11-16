@@ -34,6 +34,10 @@ const createBody = z.object({
   contactEmail: z.string().email().max(254).nullable().optional(),
 });
 const updateStatusBody = z.object({ status: statusSchema });
+const membershipBody = z.object({
+  userId: z.string().min(1),
+  role: z.enum(["owner", "manager", "catalog", "orders"]),
+});
 
 const router = new OpenAPIHono<AppContext>();
 
@@ -87,5 +91,26 @@ const updateStatusRoute = defineRoute({
 router.openapi(listRoute.route, listRoute.handler);
 router.openapi(createRoute.route, createRoute.handler);
 router.openapi(updateStatusRoute.route, updateStatusRoute.handler);
+
+const createMembershipRoute = defineRoute({
+  method: "post",
+  path: "/{id}/memberships",
+  auth: "admin",
+  tags: ["Marketplace Sellers"],
+  summary: "Assign an existing user to an approved seller",
+  description: "Creates or reactivates a seller membership for an existing active platform user. This is an explicit admin action; it does not send an invitation or create a user account.",
+  operationId: "createSellerMembership",
+  params: idParams,
+  body: membershipBody,
+  responses: {
+    201: { description: "Seller membership created" },
+    200: { description: "Seller membership reactivated" },
+    404: { description: "Seller or active user not found" },
+    409: { description: "An active membership already exists" },
+  },
+  handler: handlers.createSellerMembership,
+});
+
+router.openapi(createMembershipRoute.route, createMembershipRoute.handler);
 
 export default router;
