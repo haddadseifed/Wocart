@@ -8,7 +8,7 @@ CREATE TABLE seller_orders (
   order_number TEXT NOT NULL UNIQUE,
   subtotal INTEGER NOT NULL CHECK (subtotal >= 0),
   delivery_fee INTEGER NOT NULL CHECK (delivery_fee >= 0),
-  total INTEGER NOT NULL CHECK (total = subtotal + delivery_fee),
+  cod_amount INTEGER NOT NULL CHECK (cod_amount = subtotal + delivery_fee),
   created_at TEXT NOT NULL
 );
 
