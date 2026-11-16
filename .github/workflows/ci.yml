@@ -27,6 +27,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck --workspace codflow-server
       - run: npm test --workspace codflow-server
+      - run: node --check scripts/seed-sellercove-demo.mjs
+        working-directory: cod-server
       - run: cp wrangler.toml.example wrangler.toml
         working-directory: cod-server
       - run: npm run build:ci --workspace codflow-server
