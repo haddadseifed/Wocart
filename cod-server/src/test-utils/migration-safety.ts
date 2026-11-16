@@ -276,6 +276,15 @@ export async function fillEveryTable(db: D1Database): Promise<Array<{ table: str
     let error = broken.length > 0 ? `no value satisfies CHECK (${checks[broken[0]!]})` : "";
     if (!error) {
       try {
+        // seller_orders has a domain trigger requiring an approved seller.
+        // The migration-safety filler uses synthetic parent rows; make that
+        // synthetic seller valid before inserting its synthetic child order.
+        if (table.name === "seller_orders" && names.includes("seller_id")) {
+          const sellerId = values(choice)[names.indexOf("seller_id")];
+          if (typeof sellerId === "string") {
+            await db.prepare("UPDATE sellers SET status = 'approved' WHERE id = ?").bind(sellerId).run();
+          }
+        }
         await db.prepare(`INSERT INTO ${quote(table.name)} (${names.map(quote).join(", ")}) VALUES (${names.map(() => "?").join(", ")})`).bind(...values(choice)).run();
         return true;
       } catch (err) {
