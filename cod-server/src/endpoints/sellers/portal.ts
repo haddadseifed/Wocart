@@ -3,7 +3,7 @@ import type { Context } from "hono";
 import type { AppContext } from "@/types";
 import { defineRoute } from "@/lib/route-builder";
 import { getDb } from "@/db";
-import { sellerMemberships, sellers, sellerOrders, orders, sellerOrderItems, orderProducts } from "@/db/schema";
+import { sellerMemberships, sellerOrders, orders, sellerOrderItems, orderProducts } from "@/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { PermissionError, NotFoundError } from "@/lib/errors/classes";
 
@@ -14,18 +14,21 @@ const listQuery = z.object({
 });
 const idParams = z.object({ id: z.string().min(1) });
 
-/** Resolve only active memberships on currently approved sellers. */
+/**
+ * Historical seller-order access is retained when a seller is suspended or
+ * rejected; suspension blocks new catalogue/checkout activity, not access to
+ * existing commercial records. Membership status and role remain the access
+ * boundary for the portal.
+ */
 async function sellerIdsFor(c: Context<AppContext>): Promise<string[]> {
   const user = c.get("user");
   const db = getDb(c.env.DB);
   const rows = await db
     .select({ sellerId: sellerMemberships.sellerId })
     .from(sellerMemberships)
-    .innerJoin(sellers, eq(sellers.id, sellerMemberships.sellerId))
     .where(and(
       eq(sellerMemberships.userId, user.id),
       eq(sellerMemberships.status, "active"),
-      eq(sellers.status, "approved"),
       inArray(sellerMemberships.role, ["owner", "manager", "orders"]),
     ))
     .all();
