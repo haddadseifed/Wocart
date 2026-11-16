@@ -25,7 +25,6 @@ async function sellerIdsFor(c: Context<AppContext>): Promise<string[]> {
     .where(and(
       eq(sellerMemberships.userId, user.id),
       eq(sellerMemberships.status, "active"),
-      eq(sellers.status, "approved"),
       inArray(sellerMemberships.role, ["owner", "manager", "orders"]),
     ))
     .all();
