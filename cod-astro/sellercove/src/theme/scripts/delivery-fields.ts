@@ -162,7 +162,7 @@ export function toggleAddressFields(): void {
   // restored the moment home delivery is chosen again — and cod-server applies
   // the same rule regardless (required for home delivery only), so this stays
   // UX rather than a second definition of it.
-  const input = document.getElementById("f-address") as HTMLInputElement | null;
+  const input = document.getElementById("f-address") as HTMLInputElement | HTMLTextAreaElement | null;
   if (input?.dataset.addressRequired === "true") input.required = !hidden;
 }
 
