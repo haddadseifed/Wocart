@@ -55,6 +55,9 @@ import {
   collections,
   collectionProducts,
   offerPriceTiers,
+  sellers,
+  sellerOrders,
+  sellerOrderItems,
 } from "../db/schema";
 import type { AppDb } from "../db/client";
 import type { Author } from "../events/actor";
@@ -140,6 +143,13 @@ export interface StoreOrderData {
 }
 
 /** Another request of the same checkout attempt placed its order first; read it with `orderPlacedWith`. */
+export class SellerCheckoutUnavailableError extends Error {
+  constructor() {
+    super("This seller is not currently available for checkout, or the basket spans more than one seller");
+    this.name = "SellerCheckoutUnavailableError";
+  }
+}
+
 export class CheckoutAlreadyPlacedError extends Error {
   constructor(readonly checkoutKey: string) {
     super("This checkout's order was already placed");
@@ -1085,6 +1095,27 @@ export async function createStoreOrder(
 
   const finalDeliveryFee = delivery.fee;
 
+  // Marketplace pilot: a checkout containing seller-attributed products must
+  // belong to exactly one approved seller. Legacy unassigned catalogues keep
+  // their existing single-store behavior. Reward lines participate too, so an
+  // offer cannot silently route another seller's goods into this seller's order.
+  const sellerIds = new Set<string | null>([
+    ...priced.map((line) => snapshot.products.get(line.line.productId)?.sellerId ?? null),
+    ...rewards.map(({ placement }) => snapshot.products.get(placement.productId)?.sellerId ?? null),
+  ]);
+  const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
+  let marketplaceSellerId: string | null = null;
+  if (hasMarketplaceSeller) {
+    if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
+    marketplaceSellerId = [...sellerIds][0]!;
+    const seller = await db
+      .select({ id: sellers.id, status: sellers.status })
+      .from(sellers)
+      .where(eq(sellers.id, marketplaceSellerId))
+      .get();
+    if (!seller || seller.status !== "approved") throw new SellerCheckoutUnavailableError();
+  }
+
   // ── Reward lines ───────────────────────────────────────────────────────────
   //
   // Pricing placed every reward it reports — product, variant, stock covered
@@ -1193,6 +1224,28 @@ export async function createStoreOrder(
       statements.push(db.insert(orderProducts).values(line));
     }
 
+    if (marketplaceSellerId) {
+      const sellerOrderId = crypto.randomUUID();
+      statements.push(db.insert(sellerOrders).values({
+        id: sellerOrderId,
+        orderId: id,
+        sellerId: marketplaceSellerId,
+        orderNumber: `${orderNumber}-01`,
+        subtotal: price,
+        deliveryFee: finalDeliveryFee,
+        total: price + finalDeliveryFee,
+        createdAt: now,
+      }));
+      for (const line of [...lineRows, ...rewardLines]) {
+        statements.push(db.insert(sellerOrderItems).values({
+          id: crypto.randomUUID(),
+          sellerOrderId,
+          orderProductId: line.id!,
+          createdAt: now,
+        }));
+      }
+    }
+
     for (const input of deductions) {
       statements.push(...buildDeductStatements(db, input));
     }
@@ -1203,6 +1256,9 @@ export async function createStoreOrder(
       await db.batch(statements as [BatchStatement, ...BatchStatement[]]);
       break;
     } catch (error) {
+      if (/SELLER_NOT_APPROVED/.test(`${error instanceof Error ? error.message : String(error)} ${error instanceof Error ? String((error as { cause?: unknown }).cause ?? "") : ""}`)) {
+        throw new SellerCheckoutUnavailableError();
+      }
       const raised = raisedCouponRefusal(error);
       if (raised) throw new CouponNotApplicableError(raised);
       if (data.checkoutKey && isCheckoutKeyCollision(error)) throw new CheckoutAlreadyPlacedError(data.checkoutKey);
