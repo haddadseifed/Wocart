@@ -19,7 +19,7 @@ beforeAll(async () => {
   d1 = await createTestD1();
   app = new OpenAPIHono<AppContext>({ defaultHook: openApiValidationHook });
   app.use("*", async (c, next) => {
-    c.env = { DB: d1.raw } as never;
+    c.env = { DB: d1.raw, MEDIA_DELIVERY: "direct", MEDIA_ORIGIN: "http://localhost" } as never;
     c.set("storeId", STORE);
     await next();
   });
