@@ -1011,7 +1011,8 @@ export const sellerOrders = sqliteTable("seller_orders", {
   orderNumber: text("order_number").notNull().unique(),
   subtotal: integer("subtotal").notNull(),
   deliveryFee: integer("delivery_fee").notNull(),
-  total: integer("total").notNull(),
+  /** Customer COD amount (subtotal + delivery), not seller payout or settlement. */
+  codAmount: integer("cod_amount").notNull(),
   createdAt: text("created_at").notNull(),
 }, (t) => ({
   parentSellerUnique: uniqueIndex("seller_orders_parent_seller_unique").on(t.orderId, t.sellerId),
