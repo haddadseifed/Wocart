@@ -1250,7 +1250,7 @@ export async function createStoreOrder(
         orderNumber: `${orderNumber}-01`,
         subtotal: price,
         deliveryFee: finalDeliveryFee,
-        total: price + finalDeliveryFee,
+        codAmount: price + finalDeliveryFee,
         createdAt: now,
       }));
       for (const line of [...lineRows, ...rewardLines]) {
