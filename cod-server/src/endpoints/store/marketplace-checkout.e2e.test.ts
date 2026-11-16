@@ -57,6 +57,12 @@ beforeEach(async () => {
     showInStore: true, trackInventory: true, inventory: 1,
     createdAt: T, updatedAt: T,
   });
+  await d1.db.insert(schema.products).values({
+    id: "item-a2", sellerId: "seller-a", name: "Second seller item", handle: "second-seller-item",
+    price: 900, sku: "TEST-A2", status: "ACTIVE", visibility: true,
+    showInStore: true, trackInventory: true, inventory: 5,
+    createdAt: T, updatedAt: T,
+  });
 });
 
 async function checkout(items: unknown[], extra: Record<string, unknown> = {}, phone = "0551234567") {
@@ -73,9 +79,12 @@ async function checkout(items: unknown[], extra: Record<string, unknown> = {}, p
 
 describe("SellerCove marketplace checkout", () => {
   it("prices from the catalogue, saves one parent and one seller child, and exposes all child lines", async () => {
-    const result = await checkout([{ productId: "item-a", productName: "Edited by browser", quantity: 1, pricePerUnit: 1 }], { checkoutKey: KEY });
+    const result = await checkout([
+      { productId: "item-a", productName: "Edited by browser", quantity: 1, pricePerUnit: 1 },
+      { productId: "item-a2", productName: "Forged second name", quantity: 2, pricePerUnit: 1 },
+    ], { checkoutKey: KEY });
     expect(result.status).toBe(201);
-    expect(result.body.data).toMatchObject({ price: 2500, deliveryFee: 600, total: 3100 });
+    expect(result.body.data).toMatchObject({ price: 4300, deliveryFee: 600, total: 4900 });
 
     const parents = await d1.db.select().from(schema.orders).all();
     const children = await d1.db.select().from(schema.sellerOrders).all();
@@ -84,9 +93,9 @@ describe("SellerCove marketplace checkout", () => {
     expect(children).toHaveLength(1);
     expect(children[0]).toMatchObject({
       orderId: parents[0]!.id, sellerId: "seller-a",
-      subtotal: 2500, deliveryFee: 600, total: 3100,
+      subtotal: 4300, deliveryFee: 600, total: 4900,
     });
-    expect(lines).toHaveLength(1);
+    expect(lines).toHaveLength(2);
   });
 
   it("replays the same checkout key without duplicating the parent, seller child, or stock deduction", async () => {
