@@ -1,0 +1,13 @@
+# Local-only SellerCove dashboard worker. Uses the same local D1 persistence as cod-server.
+name = "sellercove-local-dashboard"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "codflow-os-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "../cod-server/src/db/migrations"
+
+[vars]
+PUBLIC_API_URL = "http://localhost:8787"
