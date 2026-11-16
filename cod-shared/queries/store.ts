@@ -183,7 +183,7 @@ export async function assertMarketplaceSeller(
   const seller = await db
     .select({ id: sellers.id, status: sellers.status })
     .from(sellers)
-    .where(eq(sellers.id, sellerId))
+    .where(and(eq(sellers.id, sellerId), sql`${sellers.storeId} = (SELECT pstore.id FROM stores pstore LIMIT 1)`))
     .get();
   if (!seller || seller.status !== "approved") throw new SellerCheckoutUnavailableError();
   return sellerId;
