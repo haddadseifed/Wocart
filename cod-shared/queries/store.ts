@@ -164,7 +164,7 @@ export async function assertMarketplaceSeller(
   const sellerIds = new Set<string | null>(
     productIds.map((productId) => snapshot.products.get(productId)?.sellerId ?? null),
   );
-  const approvedSeller = await db
+  const marketplaceSellerExists = await db
     .select({ id: sellers.id })
     .from(sellers)
     .where(sql`${sellers.storeId} = (SELECT pstore.id FROM stores pstore LIMIT 1)`)
@@ -174,7 +174,7 @@ export async function assertMarketplaceSeller(
   // The first seller record activates marketplace rules for this store:
   // unassigned legacy products can no longer be checked out alongside it.
   if (!hasMarketplaceSeller) {
-    if (approvedSeller) throw new SellerCheckoutUnavailableError();
+    if (marketplaceSellerExists) throw new SellerCheckoutUnavailableError();
     return null;
   }
   if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
