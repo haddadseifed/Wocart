@@ -7,6 +7,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { bundleWorker, createTestD1, type TestD1 } from "@/test-utils/d1";
 
 const STORE_ID = "store-1";
