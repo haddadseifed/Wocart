@@ -49,6 +49,7 @@ export interface CreateProductData {
   metaTitle?: string | null;
   /** Null or absent: search engines read the product's own description, shortened. */
   metaDescription?: string | null;
+  sellerId?: string | null;
 }
 
 export interface UpdateProductData {
@@ -74,6 +75,7 @@ export interface UpdateProductData {
   shippingProfileId?: string | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  sellerId?: string | null;
 }
 
 function toHandle(name: string, id: string) {
@@ -274,6 +276,7 @@ export async function createProduct(db: AppDb, data: CreateProductData, delivery
     shippingProfileId: data.shippingProfileId ?? null,
     metaTitle: data.metaTitle ?? null,
     metaDescription: data.metaDescription ?? null,
+    sellerId: data.sellerId ?? null,
     publishedAt: data.status === "ACTIVE" ? now : null,
     createdAt: now,
     updatedAt: now,
@@ -329,6 +332,7 @@ export async function updateProduct(db: AppDb, productId: string, data: UpdatePr
   if (data.shippingProfileId !== undefined) updates.shippingProfileId = data.shippingProfileId ?? null;
   if (data.metaTitle !== undefined) updates.metaTitle = data.metaTitle ?? null;
   if (data.metaDescription !== undefined) updates.metaDescription = data.metaDescription ?? null;
+  if (data.sellerId !== undefined) updates.sellerId = data.sellerId ?? null;
 
   const statements: BatchStatement[] = [
     db.update(products).set(updates).where(eq(products.id, productId)),
