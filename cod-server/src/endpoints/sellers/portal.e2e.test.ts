@@ -69,8 +69,8 @@ beforeEach(async () => {
     { id: "line-b", orderId: "parent-b", productName: "Seller B product", quantity: 1, pricePerUnit: 2000, lineTotal: 2000, createdAt: T },
   ]);
   await d1.db.insert(schema.sellerOrders).values([
-    { id: "seller-order-a", orderId: "parent-a", sellerId: "seller-a", orderNumber: "ORD-A-01", subtotal: 1000, deliveryFee: 600, total: 1600, createdAt: T },
-    { id: "seller-order-b", orderId: "parent-b", sellerId: "seller-b", orderNumber: "ORD-B-01", subtotal: 2000, deliveryFee: 600, total: 2600, createdAt: T },
+    { id: "seller-order-a", orderId: "parent-a", sellerId: "seller-a", orderNumber: "ORD-A-01", subtotal: 1000, deliveryFee: 600, codAmount: 1600, createdAt: T },
+    { id: "seller-order-b", orderId: "parent-b", sellerId: "seller-b", orderNumber: "ORD-B-01", subtotal: 2000, deliveryFee: 600, codAmount: 2600, createdAt: T },
   ]);
   await d1.db.insert(schema.sellerOrderItems).values([
     { id: "item-a", sellerOrderId: "seller-order-a", orderProductId: "line-a", createdAt: T },
