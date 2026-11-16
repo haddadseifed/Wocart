@@ -76,7 +76,7 @@ async function getSellerOrder(c: Context<AppContext>) {
       orderNumber: sellerOrders.orderNumber,
       subtotal: sellerOrders.subtotal,
       deliveryFee: sellerOrders.deliveryFee,
-      total: sellerOrders.total,
+      codAmount: sellerOrders.codAmount,
       createdAt: sellerOrders.createdAt,
       parentOrderNumber: orders.orderNumber,
       status: orders.status,
