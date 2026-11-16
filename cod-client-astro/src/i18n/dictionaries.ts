@@ -3,6 +3,7 @@
 // Add a namespace import here as pages start consuming it.
 
 import arOrders from "../../locales/ar/orders.json";
+import arSellerOrders from "../../locales/ar/seller_orders.json";
 import arAuth from "../../locales/ar/auth.json";
 import arCommon from "../../locales/ar/common.json";
 import arNavigation from "../../locales/ar/navigation.json";
@@ -32,6 +33,7 @@ import arEvents from "../../locales/ar/events.json";
 import arApps from "../../locales/ar/apps.json";
 
 import enOrders from "../../locales/en/orders.json";
+import enSellerOrders from "../../locales/en/seller_orders.json";
 import enAuth from "../../locales/en/auth.json";
 import enCommon from "../../locales/en/common.json";
 import enNavigation from "../../locales/en/navigation.json";
@@ -61,6 +63,7 @@ import enEvents from "../../locales/en/events.json";
 import enApps from "../../locales/en/apps.json";
 
 import frOrders from "../../locales/fr/orders.json";
+import frSellerOrders from "../../locales/fr/seller_orders.json";
 import frAuth from "../../locales/fr/auth.json";
 import frCommon from "../../locales/fr/common.json";
 import frNavigation from "../../locales/fr/navigation.json";
@@ -91,14 +94,14 @@ import frApps from "../../locales/fr/apps.json";
 
 import type { Locale } from "./config";
 
-export const NAMESPACES = ["orders", "auth", "common", "navigation", "dashboard", "customers", "customer-groups", "customer-tags", "reviews", "products", "product-groups", "offers", "coupons", "landing-pages", "delivery", "delivery_companies", "settings", "team", "mcp", "profile", "store-pages", "menus", "collections", "checkout-form", "whatsapp", "translations", "events", "apps"] as const;
+export const NAMESPACES = ["orders", "seller_orders", "auth", "common", "navigation", "dashboard", "customers", "customer-groups", "customer-tags", "reviews", "products", "product-groups", "offers", "coupons", "landing-pages", "delivery", "delivery_companies", "settings", "team", "mcp", "profile", "store-pages", "menus", "collections", "checkout-form", "whatsapp", "translations", "events", "apps"] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 export type Dict = Record<string, unknown>;
 
 const DICTS: Record<Locale, Partial<Record<Namespace, Dict>>> = {
-  ar: { orders: arOrders, auth: arAuth, common: arCommon, navigation: arNavigation, dashboard: arDashboard, customers: arCustomers, "customer-groups": arCustomerGroups, "customer-tags": arCustomerTags, reviews: arReviews, products: arProducts, "product-groups": arProductGroups, offers: arOffers, coupons: arCoupons, "landing-pages": arLandingPages, delivery: arDelivery, delivery_companies: arDeliveryCompanies, settings: arSettings, team: arTeam, mcp: arMcp, profile: arProfile, "store-pages": arStorePages, menus: arMenus, collections: arCollections, "checkout-form": arCheckoutForm, whatsapp: arWhatsapp, translations: arTranslations, events: arEvents, apps: arApps },
-  en: { orders: enOrders, auth: enAuth, common: enCommon, navigation: enNavigation, dashboard: enDashboard, customers: enCustomers, "customer-groups": enCustomerGroups, "customer-tags": enCustomerTags, reviews: enReviews, products: enProducts, "product-groups": enProductGroups, offers: enOffers, coupons: enCoupons, "landing-pages": enLandingPages, delivery: enDelivery, delivery_companies: enDeliveryCompanies, settings: enSettings, team: enTeam, mcp: enMcp, profile: enProfile, "store-pages": enStorePages, menus: enMenus, collections: enCollections, "checkout-form": enCheckoutForm, whatsapp: enWhatsapp, translations: enTranslations, events: enEvents, apps: enApps },
-  fr: { orders: frOrders, auth: frAuth, common: frCommon, navigation: frNavigation, dashboard: frDashboard, customers: frCustomers, "customer-groups": frCustomerGroups, "customer-tags": frCustomerTags, reviews: frReviews, products: frProducts, "product-groups": frProductGroups, offers: frOffers, coupons: frCoupons, "landing-pages": frLandingPages, delivery: frDelivery, delivery_companies: frDeliveryCompanies, settings: frSettings, team: frTeam, mcp: frMcp, profile: frProfile, "store-pages": frStorePages, menus: frMenus, collections: frCollections, "checkout-form": frCheckoutForm, whatsapp: frWhatsapp, translations: frTranslations, events: frEvents, apps: frApps },
+  ar: { orders: arOrders, seller_orders: arSellerOrders, auth: arAuth, common: arCommon, navigation: arNavigation, dashboard: arDashboard, customers: arCustomers, "customer-groups": arCustomerGroups, "customer-tags": arCustomerTags, reviews: arReviews, products: arProducts, "product-groups": arProductGroups, offers: arOffers, coupons: arCoupons, "landing-pages": arLandingPages, delivery: arDelivery, delivery_companies: arDeliveryCompanies, settings: arSettings, team: arTeam, mcp: arMcp, profile: arProfile, "store-pages": arStorePages, menus: arMenus, collections: arCollections, "checkout-form": arCheckoutForm, whatsapp: arWhatsapp, translations: arTranslations, events: arEvents, apps: arApps },
+  en: { orders: enOrders, seller_orders: enSellerOrders, auth: enAuth, common: enCommon, navigation: enNavigation, dashboard: enDashboard, customers: enCustomers, "customer-groups": enCustomerGroups, "customer-tags": enCustomerTags, reviews: enReviews, products: enProducts, "product-groups": enProductGroups, offers: enOffers, coupons: enCoupons, "landing-pages": enLandingPages, delivery: enDelivery, delivery_companies: enDeliveryCompanies, settings: enSettings, team: enTeam, mcp: enMcp, profile: enProfile, "store-pages": enStorePages, menus: enMenus, collections: enCollections, "checkout-form": enCheckoutForm, whatsapp: enWhatsapp, translations: enTranslations, events: enEvents, apps: enApps },
+  fr: { orders: frOrders, seller_orders: frSellerOrders, auth: frAuth, common: frCommon, navigation: frNavigation, dashboard: frDashboard, customers: frCustomers, "customer-groups": frCustomerGroups, "customer-tags": frCustomerTags, reviews: frReviews, products: frProducts, "product-groups": frProductGroups, offers: frOffers, coupons: frCoupons, "landing-pages": frLandingPages, delivery: frDelivery, delivery_companies: frDeliveryCompanies, settings: frSettings, team: frTeam, mcp: frMcp, profile: frProfile, "store-pages": frStorePages, menus: frMenus, collections: frCollections, "checkout-form": frCheckoutForm, whatsapp: frWhatsapp, translations: frTranslations, events: frEvents, apps: frApps },
 };
 
 export function getDict(locale: Locale, ns: Namespace): Dict {
