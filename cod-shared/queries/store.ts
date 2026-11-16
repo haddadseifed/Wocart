@@ -164,8 +164,19 @@ export async function assertMarketplaceSeller(
   const sellerIds = new Set<string | null>(
     productIds.map((productId) => snapshot.products.get(productId)?.sellerId ?? null),
   );
+  const approvedSeller = await db
+    .select({ id: sellers.id })
+    .from(sellers)
+    .where(eq(sellers.status, "approved"))
+    .limit(1)
+    .get();
   const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
-  if (!hasMarketplaceSeller) return null;
+  // The first approved seller activates marketplace rules for this store:
+  // unassigned legacy products can no longer be checked out alongside it.
+  if (!hasMarketplaceSeller) {
+    if (approvedSeller) throw new SellerCheckoutUnavailableError();
+    return null;
+  }
   if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
 
   const sellerId = [...sellerIds][0]!;
@@ -495,14 +506,22 @@ const listable = () => [
   eq(products.showInStore, true),
   eq(products.status, "ACTIVE"),
   eq(products.visibility, true),
-  // Legacy unassigned products remain compatible. Attributed products are
-  // public only while their seller remains approved for this store.
-  sql`(${products.sellerId} IS NULL OR EXISTS (
-    SELECT 1 FROM sellers s
-    WHERE s.id = ${products.sellerId}
-      AND s.status = 'approved'
-      AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
-  ))`,
+  // Before the first seller is approved this remains a legacy single-store
+  // catalogue. Once marketplace operations are active, only products owned
+  // by an approved seller are public; unassigned legacy rows are hidden.
+  sql`(
+    (${products.sellerId} IS NULL AND NOT EXISTS (
+      SELECT 1 FROM sellers active_seller
+      WHERE active_seller.status = 'approved'
+        AND active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    ))
+    OR EXISTS (
+      SELECT 1 FROM sellers s
+      WHERE s.id = ${products.sellerId}
+        AND s.status = 'approved'
+        AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    )
+  )`,
 ];
 
 /** What a storefront listing selects, joins and orders by, shared by its page and its count. */
@@ -672,12 +691,22 @@ export async function getStoreProductByHandle(
     eq(products.handle, handle),
     eq(products.status, "ACTIVE"),
     eq(products.visibility, true),
-    sql`(${products.sellerId} IS NULL OR EXISTS (
+  // Before the first seller is approved this remains a legacy single-store
+  // catalogue. Once marketplace operations are active, only products owned
+  // by an approved seller are public; unassigned legacy rows are hidden.
+  sql`(
+    (${products.sellerId} IS NULL AND NOT EXISTS (
+      SELECT 1 FROM sellers active_seller
+      WHERE active_seller.status = 'approved'
+        AND active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    ))
+    OR EXISTS (
       SELECT 1 FROM sellers s
       WHERE s.id = ${products.sellerId}
         AND s.status = 'approved'
         AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
-    ))`,
+    )
+  )`,
   ];
   if (!opts.allowUnlisted) conditions.push(eq(products.showInStore, true));
 
