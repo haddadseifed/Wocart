@@ -44,7 +44,7 @@ const statements = [
   `UPDATE stores SET cart_enabled = 1, updated_at = ${q(now)} WHERE id = ${q(STORE_ID)}`,
   ...users.flatMap((u) => [
     `INSERT OR IGNORE INTO users (id, name, email, email_verified, role, status, created_at, updated_at, language) VALUES (${q(u.id)}, ${q(u.name)}, ${q(u.email)}, 1, 'staff', 'active', ${Date.now()}, ${Date.now()}, 'ar')`,
-    `INSERT OR IGNORE INTO accounts (id, user_id, account_id, provider_id, issuer, password, created_at, updated_at) VALUES (${q("account-" + u.id)}, ${q(u.id)}, ${q(u.id)}, 'credential', 'local:credential', ${q("__PASSWORD__" + u.id)}, ${Date.now()}, ${Date.now()})`,
+    `INSERT OR IGNORE INTO accounts (id, user_id, account_id, provider_id, issuer, password, created_at, updated_at) VALUES (${q("account-" + u.id)}, ${q(u.id)}, ${q(u.id)}, 'credential', 'local:credential', ${q("__PASSWORD__" + u.id)}, ${Date.now()}, ${Date.now()}) ON CONFLICT(id) DO UPDATE SET password = excluded.password, updated_at = excluded.updated_at`,
     `INSERT OR IGNORE INTO sellers (id, store_id, name, slug, description, status, approved_at, created_at, updated_at) VALUES (${q(u.seller)}, ${q(STORE_ID)}, ${q(u.name)}, ${q(u.email.startsWith("seller-a") ? "demo-seller-a" : "demo-seller-b")}, 'Synthetic local test seller', 'approved', ${q(now)}, ${q(now)}, ${q(now)})`,
     `INSERT OR IGNORE INTO seller_memberships (id, seller_id, user_id, role, status, created_at) VALUES (${q(u.membership)}, ${q(u.seller)}, ${q(u.id)}, ${q(u.role)}, 'active', ${q(now)})`,
   ]),
