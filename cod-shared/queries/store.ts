@@ -167,7 +167,7 @@ export async function assertMarketplaceSeller(
   const approvedSeller = await db
     .select({ id: sellers.id })
     .from(sellers)
-    .where(eq(sellers.status, "approved"))
+    .where(sql`${sellers.status} = 'approved' AND ${sellers.storeId} = (SELECT pstore.id FROM stores pstore LIMIT 1)`)
     .limit(1)
     .get();
   const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
