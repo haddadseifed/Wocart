@@ -172,6 +172,8 @@ describe("SellerCove marketplace checkout", () => {
     await d1.db.update(schema.sellers).set({ status: "suspended" }).where(eq(schema.sellers.id, "seller-a"));
     const result = await checkout([{ productId: "item-a", productName: "Item", quantity: 1 }]);
     expect(result.status).toBe(422);
+    const publicProduct = await app.request("/store/products/test-item");
+    expect(publicProduct.status).toBe(404);
     expect(await d1.db.select().from(schema.orders).all()).toHaveLength(0);
     expect(await d1.db.select().from(schema.sellerOrders).all()).toHaveLength(0);
     const stock = await d1.db.select({ inventory: schema.products.inventory }).from(schema.products).where(eq(schema.products.id, "item-a")).get();
