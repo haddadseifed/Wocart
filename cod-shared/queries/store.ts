@@ -55,6 +55,9 @@ import {
   collections,
   collectionProducts,
   offerPriceTiers,
+  sellers,
+  sellerOrders,
+  sellerOrderItems,
 } from "../db/schema";
 import type { AppDb } from "../db/client";
 import type { Author } from "../events/actor";
@@ -140,6 +143,52 @@ export interface StoreOrderData {
 }
 
 /** Another request of the same checkout attempt placed its order first; read it with `orderPlacedWith`. */
+export class SellerCheckoutUnavailableError extends Error {
+  constructor() {
+    super("This seller is not currently available for checkout, or the basket spans more than one seller");
+    this.name = "SellerCheckoutUnavailableError";
+  }
+}
+
+/**
+ * Marketplace pilot gate shared by the HTTP handler and the atomic write path.
+ * Legacy unassigned catalogues remain compatible; once any line belongs to a
+ * marketplace seller, every paid/reward line must belong to that same approved
+ * seller. The database trigger repeats the approval check at commit time.
+ */
+export async function assertMarketplaceSeller(
+  db: AppDb,
+  snapshot: CatalogSnapshot,
+  productIds: string[],
+): Promise<string | null> {
+  const sellerIds = new Set<string | null>(
+    productIds.map((productId) => snapshot.products.get(productId)?.sellerId ?? null),
+  );
+  const marketplaceSellerExists = await db
+    .select({ id: sellers.id })
+    .from(sellers)
+    .where(sql`${sellers.storeId} = (SELECT pstore.id FROM stores pstore LIMIT 1)`)
+    .limit(1)
+    .get();
+  const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
+  // The first seller record activates marketplace rules for this store:
+  // unassigned legacy products can no longer be checked out alongside it.
+  if (!hasMarketplaceSeller) {
+    if (marketplaceSellerExists) throw new SellerCheckoutUnavailableError();
+    return null;
+  }
+  if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
+
+  const sellerId = [...sellerIds][0]!;
+  const seller = await db
+    .select({ id: sellers.id, status: sellers.status })
+    .from(sellers)
+    .where(and(eq(sellers.id, sellerId), sql`${sellers.storeId} = (SELECT pstore.id FROM stores pstore LIMIT 1)`))
+    .get();
+  if (!seller || seller.status !== "approved") throw new SellerCheckoutUnavailableError();
+  return sellerId;
+}
+
 export class CheckoutAlreadyPlacedError extends Error {
   constructor(readonly checkoutKey: string) {
     super("This checkout's order was already placed");
@@ -457,14 +506,21 @@ const listable = () => [
   eq(products.showInStore, true),
   eq(products.status, "ACTIVE"),
   eq(products.visibility, true),
-  // Legacy unassigned products remain compatible. Attributed products are
-  // public only while their seller remains approved for this store.
-  sql`(${products.sellerId} IS NULL OR EXISTS (
-    SELECT 1 FROM sellers s
-    WHERE s.id = ${products.sellerId}
-      AND s.status = 'approved'
-      AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
-  ))`,
+  // Before any seller record exists this remains a legacy single-store
+  // catalogue. Once marketplace onboarding starts, only products owned
+  // by an approved seller are public; unassigned legacy rows are hidden.
+  sql`(
+    (${products.sellerId} IS NULL AND NOT EXISTS (
+      SELECT 1 FROM sellers active_seller
+      WHERE active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    ))
+    OR EXISTS (
+      SELECT 1 FROM sellers s
+      WHERE s.id = ${products.sellerId}
+        AND s.status = 'approved'
+        AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    )
+  )`,
 ];
 
 /** What a storefront listing selects, joins and orders by, shared by its page and its count. */
@@ -634,12 +690,21 @@ export async function getStoreProductByHandle(
     eq(products.handle, handle),
     eq(products.status, "ACTIVE"),
     eq(products.visibility, true),
-    sql`(${products.sellerId} IS NULL OR EXISTS (
+  // Before any seller record exists this remains a legacy single-store
+  // catalogue. Once marketplace operations are active, only products owned
+  // by an approved seller are public; unassigned legacy rows are hidden.
+  sql`(
+    (${products.sellerId} IS NULL AND NOT EXISTS (
+      SELECT 1 FROM sellers active_seller
+      WHERE active_seller.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
+    ))
+    OR EXISTS (
       SELECT 1 FROM sellers s
       WHERE s.id = ${products.sellerId}
         AND s.status = 'approved'
         AND s.store_id = (SELECT pstore.id FROM stores pstore LIMIT 1)
-    ))`,
+    )
+  )`,
   ];
   if (!opts.allowUnlisted) conditions.push(eq(products.showInStore, true));
 
@@ -1085,6 +1150,16 @@ export async function createStoreOrder(
 
   const finalDeliveryFee = delivery.fee;
 
+  // Marketplace pilot: a checkout containing seller-attributed products must
+  // belong to exactly one approved seller. Legacy unassigned catalogues keep
+  // their existing single-store behavior. Reward lines participate too, so an
+  // offer cannot silently route another seller's goods into this seller's order.
+  const marketplaceSellerId = await assertMarketplaceSeller(
+    db,
+    snapshot,
+    [...priced.map((line) => line.line.productId), ...rewards.map(({ placement }) => placement.productId)],
+  );
+
   // ── Reward lines ───────────────────────────────────────────────────────────
   //
   // Pricing placed every reward it reports — product, variant, stock covered
@@ -1193,6 +1268,28 @@ export async function createStoreOrder(
       statements.push(db.insert(orderProducts).values(line));
     }
 
+    if (marketplaceSellerId) {
+      const sellerOrderId = crypto.randomUUID();
+      statements.push(db.insert(sellerOrders).values({
+        id: sellerOrderId,
+        orderId: id,
+        sellerId: marketplaceSellerId,
+        orderNumber: `${orderNumber}-01`,
+        subtotal: price,
+        deliveryFee: finalDeliveryFee,
+        codAmount: price + finalDeliveryFee,
+        createdAt: now,
+      }));
+      for (const line of [...lineRows, ...rewardLines]) {
+        statements.push(db.insert(sellerOrderItems).values({
+          id: crypto.randomUUID(),
+          sellerOrderId,
+          orderProductId: line.id!,
+          createdAt: now,
+        }));
+      }
+    }
+
     for (const input of deductions) {
       statements.push(...buildDeductStatements(db, input));
     }
@@ -1203,6 +1300,9 @@ export async function createStoreOrder(
       await db.batch(statements as [BatchStatement, ...BatchStatement[]]);
       break;
     } catch (error) {
+      if (/SELLER_NOT_APPROVED/.test(`${error instanceof Error ? error.message : String(error)} ${error instanceof Error ? String((error as { cause?: unknown }).cause ?? "") : ""}`)) {
+        throw new SellerCheckoutUnavailableError();
+      }
       const raised = raisedCouponRefusal(error);
       if (raised) throw new CouponNotApplicableError(raised);
       if (data.checkoutKey && isCheckoutKeyCollision(error)) throw new CheckoutAlreadyPlacedError(data.checkoutKey);

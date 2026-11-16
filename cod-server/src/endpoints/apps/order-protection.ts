@@ -213,7 +213,22 @@ async function placeRescued(db: Parameters<typeof protection.claimSpamOrder>[0],
   const snapshot = await storeQueries.loadCatalogSnapshot(db, lines, now);
   assertOrderable(snapshot, lines);
   const quote = await quoteOrder(db, { storeId, now, snapshot, lines, data });
-  const order = await commitOrder(db, { data, customFieldAnswers, rate: quote.delivery.rate, coupon: quote.coupon, snapshot, locale, ipAddress, userAgent, orderNumber: claim.orderNumber });
+  let order: Awaited<ReturnType<typeof commitOrder>>;
+  try {
+    order = await commitOrder(db, {
+      data, customFieldAnswers, rate: quote.delivery.rate, coupon: quote.coupon, snapshot, locale, ipAddress, userAgent,
+      orderNumber: claim.orderNumber,
+      marketplaceProductIds: [
+        ...quote.basket.priced.map((line) => line.line.productId),
+        ...quote.basket.rewards.map(({ placement }) => placement.productId),
+      ],
+    });
+  } catch (error) {
+    if (error instanceof storeQueries.SellerCheckoutUnavailableError) {
+      throw new BusinessLogicError("The seller is not available for this checkout", ERROR_CODES.SELLER_NOT_AVAILABLE);
+    }
+    throw error;
+  }
   if (!("replay" in order)) return order;
   if (!order.replay) throw new Error("The checkout's order was removed before it could be read");
   return order.replay;

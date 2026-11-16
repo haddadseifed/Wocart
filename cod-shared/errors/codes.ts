@@ -33,6 +33,7 @@ export const ERROR_CODES = {
   // ============================================================================
   ENTITY_NOT_FOUND: "ENTITY_NOT_FOUND",
   DUPLICATE_ENTITY: "DUPLICATE_ENTITY",
+  SELLER_NOT_AVAILABLE: "SELLER_NOT_AVAILABLE",
 
   // ============================================================================
   // BUSINESS LOGIC ERRORS - MCP MANAGEMENT

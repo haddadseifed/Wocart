@@ -67,3 +67,21 @@ jobs:
       - run: npm test
       - run: npx astro check
       - run: npm run build
+
+  sellercove-storefront:
+    name: SellerCove storefront (test + Astro check + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cod-astro/sellercove
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: cod-astro/sellercove/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npx astro check
+      - run: npm run build

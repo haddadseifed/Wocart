@@ -10,7 +10,7 @@ const SRC = join(ROOT, "src");
 const LOCALES = join(ROOT, "locales");
 const LANGS = ["en", "ar", "fr"] as const;
 const NAMESPACES = [
-  "orders", "auth", "common", "navigation", "dashboard", "customers",
+  "orders", "seller_orders", "auth", "common", "navigation", "dashboard", "customers",
   "customer-groups", "customer-tags", "reviews", "products", "product-groups",
   "offers", "coupons", "landing-pages", "delivery", "delivery_companies", "settings",
   "team", "mcp", "profile", "store-pages", "menus", "collections", "checkout-form", "whatsapp",

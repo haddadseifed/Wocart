@@ -1000,6 +1000,37 @@ export const sellerMemberships = sqliteTable("seller_memberships", {
 }));
 
 /**
+ * A marketplace seller's portion of one parent checkout. The first rollout
+ * permits one seller per checkout in application logic; the schema supports
+ * the buyer-facing order and this row is the seller-scoped work item.
+ */
+export const sellerOrders = sqliteTable("seller_orders", {
+  id: text("id").primaryKey(),
+  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  sellerId: text("seller_id").notNull().references(() => sellers.id, { onDelete: "restrict" }),
+  orderNumber: text("order_number").notNull().unique(),
+  subtotal: integer("subtotal").notNull(),
+  deliveryFee: integer("delivery_fee").notNull(),
+  /** Customer COD amount (subtotal + delivery), not seller payout or settlement. */
+  codAmount: integer("cod_amount").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (t) => ({
+  parentSellerUnique: uniqueIndex("seller_orders_parent_seller_unique").on(t.orderId, t.sellerId),
+  parent: index("seller_orders_parent_idx").on(t.orderId),
+  sellerCreated: index("seller_orders_seller_created_idx").on(t.sellerId, t.createdAt),
+}));
+
+/** Stable line-level ownership snapshot; later catalogue reassignment cannot move a sold line. */
+export const sellerOrderItems = sqliteTable("seller_order_items", {
+  id: text("id").primaryKey(),
+  sellerOrderId: text("seller_order_id").notNull().references(() => sellerOrders.id, { onDelete: "cascade" }),
+  orderProductId: text("order_product_id").notNull().unique().references(() => orderProducts.id, { onDelete: "cascade" }),
+  createdAt: text("created_at").notNull(),
+}, (t) => ({
+  sellerOrderItemsOrder: index("seller_order_items_order_idx").on(t.sellerOrderId),
+}));
+
+/**
  * The languages a store has added (ADR 0005, migration 0036) — Shopify's
  * shop locales. A language is added unpublished, translated, then published;
  * only published languages reach shoppers. The primary (`stores.lang`) always

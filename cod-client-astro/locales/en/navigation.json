@@ -2,6 +2,7 @@
   "sidebar": {
     "dashboard": "Home",
     "orders": "Orders",
+    "seller_orders": "Seller orders",
     "orders_abandoned": "Abandoned",
     "customers": "Customers",
     "products": "Products",

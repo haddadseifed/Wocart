@@ -1,0 +1,21 @@
+{
+  "title": "Seller orders",
+  "no_access": "This account has no active membership that can read seller orders.",
+  "load_error": "Could not load seller orders. Please try again.",
+  "empty": "No orders have been assigned to this seller yet.",
+  "loading": "Loading orders...",
+  "select_order": "Select an order to see its details.",
+  "order_number": "Order number",
+  "customer": "Customer",
+  "phone": "Phone",
+  "address": "Address",
+  "delivery_type": "Delivery type",
+  "home": "Home delivery",
+  "stop_desk": "Stop-desk pickup",
+  "products": "Products",
+  "quantity": "Quantity",
+  "subtotal": "Products subtotal",
+  "delivery": "Delivery fee",
+  "cod_amount": "Amount due on delivery",
+  "notes": "Customer notes"
+}

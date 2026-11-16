@@ -34,6 +34,8 @@ export interface CatalogProduct {
   showInStore: boolean;
   /** Stored JSON, read to translate the product's variant labels. */
   variantOptions: string | null;
+  /** Approved marketplace seller responsible for this catalogue item; null for legacy single-store products. */
+  sellerId?: string | null;
 }
 
 export interface CatalogVariant {
@@ -70,6 +72,7 @@ const PRODUCT_COLUMNS = {
   visibility: products.visibility,
   showInStore: products.showInStore,
   variantOptions: products.variantOptions,
+  sellerId: products.sellerId,
 } as const;
 
 const VARIANT_COLUMNS = {

@@ -412,16 +412,31 @@ export async function createStoreOrder(c: Context<AppContext>) {
     if (held) return c.json({ success: true, data: held }, 201);
   }
 
-  const order = await commitOrder(db, {
-    data,
-    customFieldAnswers,
-    rate: quote.delivery.rate,
-    coupon: quote.coupon,
-    snapshot,
-    locale,
-    ipAddress,
-    userAgent,
-  });
+  let order: Awaited<ReturnType<typeof commitOrder>>;
+  try {
+    order = await commitOrder(db, {
+      data,
+      customFieldAnswers,
+      rate: quote.delivery.rate,
+      coupon: quote.coupon,
+      snapshot,
+      locale,
+      ipAddress,
+      userAgent,
+      marketplaceProductIds: [
+        ...quote.basket.priced.map((line) => line.line.productId),
+        ...quote.basket.rewards.map(({ placement }) => placement.productId),
+      ],
+    });
+  } catch (error) {
+    if (error instanceof queries.SellerCheckoutUnavailableError) {
+      throw new BusinessLogicError(
+        "The selected seller is not available for this checkout, or the basket contains products from different sellers",
+        ERROR_CODES.SELLER_NOT_AVAILABLE,
+      );
+    }
+    throw error;
+  }
   if ("replay" in order) {
     if (!order.replay) throw new Error("The checkout's order was placed by another request, then removed before it could be read");
     return checkoutReplay(c, order.replay, submitted.phone);

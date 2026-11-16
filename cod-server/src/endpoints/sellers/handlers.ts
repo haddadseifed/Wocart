@@ -1,9 +1,9 @@
 import type { Context } from "hono";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
-import { stores } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { ConflictError, NotFoundError } from "@/lib/errors/classes";
+import { stores, sellerMemberships, users } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
+import { BusinessLogicError, ConflictError, NotFoundError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 import * as queries from "./queries";
 
@@ -61,4 +61,58 @@ export async function updateSellerStatus(c: Context<AppContext>) {
   const seller = await queries.setSellerStatus(db, { storeId, id, status: body.status, now: new Date().toISOString() });
   if (!seller) throw new NotFoundError("Seller", id);
   return c.json({ success: true, data: seller }, 200);
+}
+
+/** Assign an existing active platform user to an approved seller. */
+export async function createSellerMembership(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const storeId = await currentStoreId(c);
+  const sellerId = c.req.param("id")!;
+  const body = (c.req as any).valid?.("json") ?? await c.req.json();
+
+  const seller = await queries.getSellerById(db, storeId, sellerId);
+  if (!seller) throw new NotFoundError("Seller", sellerId);
+  if (seller.status !== "approved") {
+    throw new BusinessLogicError("Only an approved seller can receive portal memberships", ERROR_CODES.SELLER_NOT_AVAILABLE, { sellerId });
+  }
+
+  const user = await db.select({ id: users.id, status: users.status }).from(users).where(eq(users.id, body.userId)).get();
+  if (!user || user.status !== "active") throw new NotFoundError("Active user", body.userId);
+
+  const existing = await db.select().from(sellerMemberships)
+    .where(and(eq(sellerMemberships.sellerId, sellerId), eq(sellerMemberships.userId, body.userId)))
+    .get();
+  if (existing?.status === "active") {
+    throw new ConflictError("This user already has an active membership for the seller", ERROR_CODES.DUPLICATE_ENTITY, { sellerId, userId: body.userId });
+  }
+
+  if (existing) {
+    await db.update(sellerMemberships)
+      .set({ role: body.role, status: "active" })
+      .where(eq(sellerMemberships.id, existing.id))
+      .run();
+    const [membership] = await db.select({
+      id: sellerMemberships.id,
+      sellerId: sellerMemberships.sellerId,
+      userId: sellerMemberships.userId,
+      role: sellerMemberships.role,
+      status: sellerMemberships.status,
+      createdAt: sellerMemberships.createdAt,
+    }).from(sellerMemberships).where(eq(sellerMemberships.id, existing.id)).limit(1).all();
+    return c.json({ success: true, data: membership }, 200);
+  }
+
+  const id = crypto.randomUUID();
+  await db.insert(sellerMemberships).values({
+    id, sellerId, userId: body.userId, role: body.role, status: "active", createdAt: new Date().toISOString(),
+  });
+  const [membership] = await db.select({
+    id: sellerMemberships.id,
+    sellerId: sellerMemberships.sellerId,
+    userId: sellerMemberships.userId,
+    role: sellerMemberships.role,
+    status: sellerMemberships.status,
+    createdAt: sellerMemberships.createdAt,
+  }).from(sellerMemberships).where(eq(sellerMemberships.id, id)).limit(1).all();
+  return c.json({ success: true, data: membership }, 201);
 }
