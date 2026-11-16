@@ -1,0 +1,18 @@
+{
+  "title": "Commandes vendeur",
+  "no_access": "Ce compte n'a pas d'adhésion active autorisant l'accès aux commandes du vendeur.",
+  "load_error": "Impossible de charger les commandes du vendeur. Réessayez.",
+  "empty": "Aucune commande n'est encore attribuée à ce vendeur.",
+  "loading": "Chargement des commandes...",
+  "select_order": "Sélectionnez une commande pour voir ses détails.",
+  "order_number": "Numéro de commande",
+  "customer": "Client",
+  "phone": "Téléphone",
+  "address": "Adresse",
+  "products": "Produits",
+  "quantity": "Quantité",
+  "subtotal": "Sous-total des produits",
+  "delivery": "Frais de livraison",
+  "cod_amount": "Montant dû à la livraison",
+  "notes": "Notes du client"
+}
