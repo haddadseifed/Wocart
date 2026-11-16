@@ -150,6 +150,34 @@ export class SellerCheckoutUnavailableError extends Error {
   }
 }
 
+/**
+ * Marketplace pilot gate shared by the HTTP handler and the atomic write path.
+ * Legacy unassigned catalogues remain compatible; once any line belongs to a
+ * marketplace seller, every paid/reward line must belong to that same approved
+ * seller. The database trigger repeats the approval check at commit time.
+ */
+export async function assertMarketplaceSeller(
+  db: AppDb,
+  snapshot: CatalogSnapshot,
+  productIds: string[],
+): Promise<string | null> {
+  const sellerIds = new Set<string | null>(
+    productIds.map((productId) => snapshot.products.get(productId)?.sellerId ?? null),
+  );
+  const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
+  if (!hasMarketplaceSeller) return null;
+  if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
+
+  const sellerId = [...sellerIds][0]!;
+  const seller = await db
+    .select({ id: sellers.id, status: sellers.status })
+    .from(sellers)
+    .where(eq(sellers.id, sellerId))
+    .get();
+  if (!seller || seller.status !== "approved") throw new SellerCheckoutUnavailableError();
+  return sellerId;
+}
+
 export class CheckoutAlreadyPlacedError extends Error {
   constructor(readonly checkoutKey: string) {
     super("This checkout's order was already placed");
@@ -1099,22 +1127,11 @@ export async function createStoreOrder(
   // belong to exactly one approved seller. Legacy unassigned catalogues keep
   // their existing single-store behavior. Reward lines participate too, so an
   // offer cannot silently route another seller's goods into this seller's order.
-  const sellerIds = new Set<string | null>([
-    ...priced.map((line) => snapshot.products.get(line.line.productId)?.sellerId ?? null),
-    ...rewards.map(({ placement }) => snapshot.products.get(placement.productId)?.sellerId ?? null),
-  ]);
-  const hasMarketplaceSeller = [...sellerIds].some((id) => id !== null);
-  let marketplaceSellerId: string | null = null;
-  if (hasMarketplaceSeller) {
-    if (sellerIds.size !== 1 || sellerIds.has(null)) throw new SellerCheckoutUnavailableError();
-    marketplaceSellerId = [...sellerIds][0]!;
-    const seller = await db
-      .select({ id: sellers.id, status: sellers.status })
-      .from(sellers)
-      .where(eq(sellers.id, marketplaceSellerId))
-      .get();
-    if (!seller || seller.status !== "approved") throw new SellerCheckoutUnavailableError();
-  }
+  const marketplaceSellerId = await assertMarketplaceSeller(
+    db,
+    snapshot,
+    [...priced.map((line) => line.line.productId), ...rewards.map(({ placement }) => placement.productId)],
+  );
 
   // ── Reward lines ───────────────────────────────────────────────────────────
   //
