@@ -21,6 +21,16 @@ port_has_listener() {
   ss -ltnH 2>/dev/null | grep -Eq "[:.]$1[[:space:]]"
 }
 
+# Refresh the local-only SellerCove fixture before Wrangler opens the D1 store.
+# This avoids concurrent access to the local database and never contacts production.
+if [[ "${CODESPACES:-}" == "true" ]] && ! http_responds 8787 && ! port_has_listener 8787; then
+  echo "[SellerCove] refreshing the local demo fixture before API startup"
+  if ! SELLERCOVE_QUIET=1 npm --prefix "$ROOT/cod-server" run db:seed:sellercove:local; then
+    echo "[SellerCove] WARNING: demo fixture seed did not complete."
+    echo "[SellerCove] For a fresh local database, run: npm --prefix cod-server run db:setup:local"
+  fi
+fi
+
 start_service() {
   local name="$1"
   local port="$2"
