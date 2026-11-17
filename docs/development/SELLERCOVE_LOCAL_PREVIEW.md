@@ -23,32 +23,35 @@ Do not run any command containing `--remote`, `deploy`, or `production`.
 
 ## Local-only environment files
 
-Create these files only if they do not already exist; if one exists, inspect it
-and add only the missing local values rather than replacing it.
+The Codespaces startup script configures these ignored files automatically
+before launching the API and storefront. It uses GitHub's built-in
+`CODESPACE_NAME` and `GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN` variables
+to derive the forwarded origins, preserves existing secrets and unrelated
+entries, and creates a local-only `BETTER_AUTH_SECRET` if one is missing.
 
-1. `cod-server/.dev.vars`: set `STORE_API_KEY=codflow-dev-store-key` and an exact CORS allowlist:
-   `ALLOWED_ORIGINS=https://<dashboard-forwarded-host>,https://<storefront-forwarded-host>`.
-   Replace each placeholder with the origin shown in Codespaces Ports for ports
-   4321 and 4322 (scheme + host only; no path or trailing slash). Separate
-   origins with commas. For a browser opened on localhost instead, use the
-   matching `http://localhost:4321,http://localhost:4322` origins.
-   **Do not use `*`:** this API sends credentialed CORS responses and requires
-   an explicit origin allowlist. The local Wrangler default allows localhost;
-   this `.dev.vars` value overrides it for phone access.
-2. `cod-astro/sellercove/.dev.vars`:
-   `STORE_API_KEY=codflow-dev-store-key` and
-   `COD_SERVER_URL=http://localhost:8787`.
-3. `cod-client-astro/.dev.vars`: set a unique local-only
-   `BETTER_AUTH_SECRET` (at least 32 characters), then set all three public
-   origins from the Codespaces Ports panel:
-   - `PUBLIC_APP_URL`: the forwarded URL for port 4321 (dashboard origin).
-   - `PUBLIC_TRUSTED_ORIGINS`: the same port-4321 origin, with no path.
-   - `PUBLIC_API_URL`: the forwarded URL for port 8787 (API origin).
-   These are browser-facing origins: **do not use localhost for them when
-   opening the dashboard on your phone**. The local dashboard config also binds
-   `RATE_LIMIT_KV`; Wrangler stores that namespace in the shared local state.
-   Keep port 8787 private; Codespaces authentication protects the forwarded URL.
-   These public URLs are not secrets, but they must be reachable from the phone.
+To regenerate the values manually from the repository root, run:
+
+```bash
+node cod-server/scripts/configure-sellercove-codespaces.mjs
+```
+
+The script configures:
+
+- `cod-server/.dev.vars`: the shared local `STORE_API_KEY` and exact
+  `ALLOWED_ORIGINS` for ports 4321 and 4322.
+- `cod-astro/sellercove/.dev.vars`: the same `STORE_API_KEY` and
+  `COD_SERVER_URL=http://localhost:8787` for server-side storefront calls.
+- `cod-client-astro/.dev.vars`: a preserved/generated local
+  `BETTER_AUTH_SECRET`, `PUBLIC_APP_URL` and `PUBLIC_TRUSTED_ORIGINS`
+  for port 4321, plus `PUBLIC_API_URL` for port 8787.
+
+The script never changes port visibility. Keep ports 4321, 4322 and 8787
+private. The browser-facing origins are derived from Codespaces; internal
+server-to-server calls continue to use localhost. **Do not use `*`** for
+credentialed CORS. If you run the configurator manually while the API is
+already running, restart the API once so Wrangler reloads the updated
+`ALLOWED_ORIGINS`. A normal Codespace restart runs configuration before
+starting the services.
 
 The dashboard signs users in at `/sign-in`. The dashboard obtains a short-lived
 JWT from its own same-origin auth endpoint, then the browser sends that JWT to
