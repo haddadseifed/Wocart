@@ -70,12 +70,13 @@ repository root:
 
 ```bash
 npm --prefix cod-server run db:setup:local
-npm --prefix cod-server run db:seed:sellercove:local
 ```
 
-The setup applies migrations to local D1 and runs the existing idempotent store
-seed. The SellerCove seed adds two synthetic sellers and one product per seller.
-Both commands use local persistence only; do not add `--remote`.
+This applies migrations to local D1 and runs the idempotent base-store seed.
+On Codespaces start, the unified startup script refreshes the two synthetic
+SellerCove sellers and their local test products before starting Wrangler,
+provided the API is not already running. The demo seed is idempotent, does not
+reset existing seller passwords by default, and never uses remote D1.
 
 Then start the complete local stack from the repository root:
 
@@ -94,14 +95,6 @@ Keep all ports private; the setup script does not change visibility. If you
 pull new commits into an already-running Codespace, restart the Codespace once
 (not Rebuild) so Wrangler reloads the generated local environment before the
 services start.
-
-The dashboard signs in at `/sign-in` as `seller-a@example.test` or
-`seller-b@example.test`; then open `/seller/orders`. The storefront path
-for the local Seller A fixture is `/products/demo-seller-a-product`. Use
-synthetic buyer details and an Algerian wilaya/commune offered by the local
-seeded shipping profile. Place one order for Seller A, then refresh the Seller
-A portal. Seller B's portal must not show Seller A's order. The cart pilot
-rejects a basket mixing Seller A and Seller B products.
 
 ## Synthetic account credentials
 
