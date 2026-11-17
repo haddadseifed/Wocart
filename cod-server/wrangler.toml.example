@@ -129,8 +129,9 @@ MEDIA_DELIVERY = "direct"
 MEDIA_ORIGIN = "http://localhost:8787/media"
 BETTER_AUTH_URL = "http://localhost:4321/api/auth"
 WORKER_SELF_URL = "http://localhost:8787/"
-# Development allows all origins for easier testing. Production uses ALLOWED_ORIGINS.
-ALLOWED_ORIGINS = "*"
+# Local browser origins are explicit. Codespaces replaces this via .dev.vars
+# with its exact forwarded dashboard/storefront origins; never use "*" with credentials.
+ALLOWED_ORIGINS = "http://localhost:4321,http://localhost:4322"
 
 # Production environment.
 # Deploy with `wrangler deploy --env production` after editing the values.

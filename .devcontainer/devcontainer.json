@@ -1,0 +1,29 @@
+{
+  "name": "SellerCove Codespaces",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "forwardPorts": [
+    4321,
+    4322,
+    8787
+  ],
+  "portsAttributes": {
+    "4321": {
+      "label": "SellerCove Dashboard",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    },
+    "4322": {
+      "label": "SellerCove Storefront",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    },
+    "8787": {
+      "label": "SellerCove API",
+      "onAutoForward": "silent",
+      "visibility": "private"
+    }
+  },
+  "postCreateCommand": "npm ci && npm ci --prefix cod-astro/sellercove",
+  "postStartCommand": "bash .devcontainer/start-sellercove.sh",
+  "postAttachCommand": "bash .devcontainer/start-sellercove.sh"
+}

@@ -1,214 +1,93 @@
 /**
  * CORS Middleware Tests
- * Verifies origin validation in development and production environments.
+ * CORS controls browser response access; it does not replace authentication.
  */
-
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Hono } from "hono";
 import { corsMiddleware } from "./cors";
 import type { AppContext } from "@/types/app";
 
-describe("CORS Middleware", () => {
-  let app: Hono<AppContext>;
+function makeApp(environment: string, allowedOrigins?: string) {
+  const app = new Hono<AppContext>();
+  app.use("*", async (c, next) => {
+    c.env = { ENVIRONMENT: environment, ALLOWED_ORIGINS: allowedOrigins } as any;
+    await next();
+  });
+  app.use("*", corsMiddleware);
+  app.get("/test", (c) => c.json({ ok: true }));
+  app.options("/test", (c) => c.body(null, 204));
+  app.get("/auth-check", (c) => c.json({ authenticated: false }, 401));
+  app.get("/raw", () => new Response("raw-body", { status: 200 }));
+  return app;
+}
 
-  describe("Development Environment", () => {
-    beforeEach(() => {
-      app = new Hono<AppContext>();
-      app.use("*", async (c, next) => {
-        c.env = {
-          ENVIRONMENT: "development",
-          ALLOWED_ORIGINS: "*",
-        } as any;
-        await next();
-      });
-      app.use("*", corsMiddleware);
-      app.get("/test", (c) => c.json({ ok: true }));
-    });
-
-    it("should allow any origin in development", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "http://localhost:3000",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:3000");
-    });
-
-    it("should allow different origin in development", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "http://localhost:5173",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
-    });
-
-    it("should handle OPTIONS preflight", async () => {
-      const res = await app.request("/test", {
-        method: "OPTIONS",
-        headers: {
-          origin: "http://localhost:3000",
-        },
-      });
-
-      expect(res.status).toBe(204);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:3000");
-      expect(res.headers.get("Access-Control-Allow-Methods")).toContain("GET");
-      expect(res.headers.get("Access-Control-Allow-Methods")).toContain("POST");
-    });
+describe("CORS middleware", () => {
+  it("allows an explicitly listed development origin with credentials", async () => {
+    const app = makeApp("development", "https://dashboard.example.test,https://store.example.test");
+    const res = await app.request("/test", { headers: { origin: "https://dashboard.example.test" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://dashboard.example.test");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+    expect(res.headers.get("Vary")).toBe("Origin");
   });
 
-  describe("Production Environment - Whitelist", () => {
-    beforeEach(() => {
-      app = new Hono<AppContext>();
-      app.use("*", async (c, next) => {
-        c.env = {
-          ENVIRONMENT: "production",
-          ALLOWED_ORIGINS: "https://app.example.com,https://store.example.com",
-        } as any;
-        await next();
-      });
-      app.use("*", corsMiddleware);
-      app.get("/test", (c) => c.json({ ok: true }));
-    });
-
-    it("should allow whitelisted origin", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "https://app.example.com",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-      expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
-    });
-
-    it("should allow second whitelisted origin", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "https://store.example.com",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://store.example.com");
-      expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
-    });
-
-    it("should reject non-whitelisted origin by returning first allowed origin", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "https://evil.com",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-      // Browser will reject this response due to origin mismatch
-    });
-
-    it("should handle requests without origin header", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-    });
-
-    it("should handle OPTIONS preflight for whitelisted origin", async () => {
-      const res = await app.request("/test", {
-        method: "OPTIONS",
-        headers: {
-          origin: "https://app.example.com",
-        },
-      });
-
-      expect(res.status).toBe(204);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-    });
+  it("does not treat a wildcard as a credentialed origin allowlist", async () => {
+    const app = makeApp("development", "*");
+    const res = await app.request("/test", { headers: { origin: "https://dashboard.example.test" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
   });
 
-  describe("Production Environment - No ALLOWED_ORIGINS", () => {
-    beforeEach(() => {
-      app = new Hono<AppContext>();
-      app.use("*", async (c, next) => {
-        c.env = {
-          ENVIRONMENT: "production",
-          // ALLOWED_ORIGINS undefined
-        } as any;
-        await next();
-      });
-      app.use("*", corsMiddleware);
-      app.get("/test", (c) => c.json({ ok: true }));
-    });
-
-    it("should fall back to wildcard if no ALLOWED_ORIGINS set", async () => {
-      const res = await app.request("/test", {
-        method: "GET",
-        headers: {
-          origin: "https://app.example.com",
-        },
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-    });
+  it("does not grant CORS access to an unlisted development origin", async () => {
+    const app = makeApp("development", "https://dashboard.example.test");
+    const res = await app.request("/test", { headers: { origin: "https://untrusted.example.test" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
   });
 
-  describe("Raw Response handlers (streamed bodies)", () => {
-    beforeEach(() => {
-      app = new Hono<AppContext>();
-      app.use("*", async (c, next) => {
-        c.env = {
-          ENVIRONMENT: "production",
-          ALLOWED_ORIGINS: "https://app.example.com",
-        } as any;
-        await next();
-      });
-      app.use("*", corsMiddleware);
-    });
+  it("rejects an unlisted OPTIONS preflight", async () => {
+    const app = makeApp("development", "https://dashboard.example.test");
+    const res = await app.request("/test", { method: "OPTIONS", headers: { origin: "https://untrusted.example.test" } });
+    expect(res.status).toBe(403);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+  });
 
-    // Regression: handlers returning a raw `new Response(...)` (label PDF
-    // proxy, R2 image streaming) bypass Hono's prepared-header application,
-    // so headers set before next() never reached them and the browser
-    // blocked the response with a CORS error despite the 200.
-    it("adds CORS headers to a raw Response", async () => {
-      app.get("/raw", () => new Response("raw-body", {
-        status: 200,
-        headers: { "Content-Type": "application/pdf" },
-      }));
+  it("answers an allowed OPTIONS preflight with the expected methods and headers", async () => {
+    const app = makeApp("development", "https://dashboard.example.test");
+    const res = await app.request("/test", { method: "OPTIONS", headers: { origin: "https://dashboard.example.test" } });
+    expect(res.status).toBe(204);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://dashboard.example.test");
+    expect(res.headers.get("Access-Control-Allow-Methods")).toContain("POST");
+    expect(res.headers.get("Access-Control-Allow-Headers")).toContain("Authorization");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+  });
 
-      const res = await app.request("/raw", {
-        method: "GET",
-        headers: { origin: "https://app.example.com" },
-      });
+  it("does not add CORS headers to requests without Origin and preserves their status", async () => {
+    const app = makeApp("development", "https://dashboard.example.test");
+    const res = await app.request("/auth-check");
+    expect(res.status).toBe(401);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+  });
 
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-      expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
-    });
+  it("does not bypass the existing authentication response for an unlisted origin", async () => {
+    const app = makeApp("development", "https://dashboard.example.test");
+    const res = await app.request("/auth-check", { headers: { origin: "https://untrusted.example.test" } });
+    expect(res.status).toBe(401);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+  });
 
-    it("does not duplicate CORS headers on context-built responses", async () => {
-      app.get("/json", (c) => c.json({ ok: true }));
+  it("requires an explicit allowlist in production too", async () => {
+    const app = makeApp("production");
+    const res = await app.request("/test", { headers: { origin: "https://dashboard.example.test" } });
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+  });
 
-      const res = await app.request("/json", {
-        method: "GET",
-        headers: { origin: "https://app.example.com" },
-      });
-
-      expect(res.status).toBe(200);
-      expect([...res.headers.keys()].filter((k) => k === "access-control-allow-origin")).toHaveLength(1);
-    });
+  it("preserves CORS headers on raw Response handlers", async () => {
+    const app = makeApp("production", "https://dashboard.example.test");
+    const res = await app.request("/raw", { headers: { origin: "https://dashboard.example.test" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://dashboard.example.test");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
   });
 });

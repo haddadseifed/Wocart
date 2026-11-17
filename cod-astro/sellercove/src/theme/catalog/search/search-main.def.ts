@@ -3,6 +3,7 @@ import type { ProductPage, ProductSort } from "@wocart/storefront";
 import { FIELD, GROUP, SECTION } from "../labels";
 import { copyOverrides, schemeField, sectionSpacing, styleField } from "../shared";
 import { pageRequest, requestedPage, requestedSort } from "@/theme/utils/pagination";
+import { searchQueryCandidates } from "@/theme/utils/arabic-search";
 import SearchMain from "@/theme/components/search/SearchMain.astro";
 
 /** What a search shows: the words asked, and the page of products they find. */
@@ -38,7 +39,11 @@ export const searchMain = defineComponent({
     const query = (params.q ?? "").trim();
     const page = requestedPage(params.page);
     const sort = requestedSort(params.sort);
-    const result = query ? await storefront.products.search(query, pageRequest(page, sort)) : { items: [], hasNext: false, total: 0 };
+    let result: ProductPage = { items: [], hasNext: false, total: 0 };
+    for (const candidate of searchQueryCandidates(query)) {
+      result = await storefront.products.search(candidate, pageRequest(page, sort));
+      if (result.items.length > 0) break;
+    }
     return { content: copyOverrides(context.content, props), view: { query, page, sort, result } };
   },
 });

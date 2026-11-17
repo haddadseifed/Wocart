@@ -25,8 +25,13 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - run: bash -n .devcontainer/start-sellercove.sh
       - run: npm run typecheck --workspace codflow-server
       - run: npm test --workspace codflow-server
+      - run: node --check scripts/seed-sellercove-demo.mjs
+        working-directory: cod-server
+      - run: node --check scripts/configure-sellercove-codespaces.mjs
+        working-directory: cod-server
       - run: cp wrangler.toml.example wrangler.toml
         working-directory: cod-server
       - run: npm run build:ci --workspace codflow-server
