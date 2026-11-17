@@ -31,6 +31,14 @@ describe("CORS middleware", () => {
     expect(res.headers.get("Vary")).toBe("Origin");
   });
 
+  it("does not treat a wildcard as a credentialed origin allowlist", async () => {
+    const app = makeApp("development", "*");
+    const res = await app.request("/test", { headers: { origin: "https://dashboard.example.test" } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
+  });
+
   it("does not grant CORS access to an unlisted development origin", async () => {
     const app = makeApp("development", "https://dashboard.example.test");
     const res = await app.request("/test", { headers: { origin: "https://untrusted.example.test" } });
