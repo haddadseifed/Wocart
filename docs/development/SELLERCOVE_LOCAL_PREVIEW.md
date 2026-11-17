@@ -26,7 +26,15 @@ Do not run any command containing `--remote`, `deploy`, or `production`.
 Create these files only if they do not already exist; if one exists, inspect it
 and add only the missing local values rather than replacing it.
 
-1. `cod-server/.dev.vars`: set `STORE_API_KEY=codflow-dev-store-key`.
+1. `cod-server/.dev.vars`: set `STORE_API_KEY=codflow-dev-store-key` and an exact CORS allowlist:
+   `ALLOWED_ORIGINS=https://<dashboard-forwarded-host>,https://<storefront-forwarded-host>`.
+   Replace each placeholder with the origin shown in Codespaces Ports for ports
+   4321 and 4322 (scheme + host only; no path or trailing slash). Separate
+   origins with commas. For a browser opened on localhost instead, use the
+   matching `http://localhost:4321,http://localhost:4322` origins.
+   **Do not use `*`:** this API sends credentialed CORS responses and requires
+   an explicit origin allowlist. The local Wrangler default allows localhost;
+   this `.dev.vars` value overrides it for phone access.
 2. `cod-astro/sellercove/.dev.vars`:
    `STORE_API_KEY=codflow-dev-store-key` and
    `COD_SERVER_URL=http://localhost:8787`.
