@@ -9,7 +9,8 @@ The intended operating model is a trusted, useful marketplace—not a generic ca
 ## Current implementation boundary
 
 - The current operational pilot is Algeria-only: DZD, Algerian wilayas and communes, and only the delivery and cash-on-delivery options supported by the connected store configuration.
-- The current cart pilot accepts products from one seller per checkout. A mixed-seller basket is rejected; do not describe split-cart checkout as available.
+- The current checkout pilot accepts products from one seller per checkout. A mixed-seller basket remains blocked.
+- The target order architecture must preserve one parent checkout with seller-specific suborders and line-level seller ownership from the beginning. Do not enable mixed-seller carts until suborder creation, per-seller stock reservation, shipment/fee allocation, COD reconciliation and returns are implemented and tested.
 - Seller foundation and seller-scoped order access are under development. Treat seller self-service catalogue management, public seller profiles, commissions, settlement ledger, carrier integrations and production reconciliation as incomplete until their code and tests prove otherwise.
 - International checkout, payments, tax/customs and fulfilment are not part of the current product scope.
 
