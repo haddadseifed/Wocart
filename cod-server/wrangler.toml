@@ -57,7 +57,7 @@ MEDIA_DELIVERY = "direct"
 MEDIA_ORIGIN = "http://localhost:8787/media"
 BETTER_AUTH_URL = "http://localhost:4321/api/auth"
 WORKER_SELF_URL = "http://localhost:8787/"
-ALLOWED_ORIGINS = "*"
+ALLOWED_ORIGINS = "http://localhost:4321,http://localhost:4322"
 
 [dev]
 port = 8787
