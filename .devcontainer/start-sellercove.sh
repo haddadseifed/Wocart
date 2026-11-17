@@ -60,7 +60,36 @@ else
   echo "[SellerCove] WARNING: API did not respond within 90 seconds; see $LOG_DIR/api.log"
 fi
 
+wait_for_service() {
+  local name="$1"
+  local port="$2"
+  local log="$3"
+
+  for _ in $(seq 1 60); do
+    if http_responds "$port"; then
+      local status
+      status="$(curl --silent --show-error --max-time 3 --output /dev/null --write-out "%{http_code}" "http://127.0.0.1:$port/" 2>/dev/null || echo "000")"
+      echo "[SellerCove] $name ready on $port (HTTP $status)"
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "[SellerCove] WARNING: $name did not respond on $port within 60 seconds; recent log:"
+  tail -n 60 "$log" 2>/dev/null || true
+  return 1
+}
+
 start_service dashboard 4321 npm --prefix "$ROOT/cod-client-astro" run dev -- --host 0.0.0.0 --port 4321
 start_service storefront 4322 npm --prefix "$ROOT/cod-astro/sellercove" run dev -- --host 0.0.0.0 --port 4322
 
-echo "[SellerCove] startup requested. Logs are in $LOG_DIR"
+dashboard_ready=false
+storefront_ready=false
+if wait_for_service dashboard 4321 "$LOG_DIR/dashboard.log"; then dashboard_ready=true; fi
+if wait_for_service storefront 4322 "$LOG_DIR/storefront.log"; then storefront_ready=true; fi
+
+if "$api_ready" && "$dashboard_ready" && "$storefront_ready"; then
+  echo "[SellerCove] all three services are responding. Logs: $LOG_DIR"
+else
+  echo "[SellerCove] stack is incomplete; inspect the logs in $LOG_DIR"
+fi
