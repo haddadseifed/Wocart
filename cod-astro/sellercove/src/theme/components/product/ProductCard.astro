@@ -182,7 +182,36 @@ const filled = rating ? Math.round(rating.avgRating) : 0;
     :global([data-card-button]) .product-card:hover .card-quick,
     :global([data-card-button]) .product-card:focus-visible .card-quick { opacity: 1; transform: none; }
   }
-  .card-body { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; }
+  .product-card {
+    position: relative;
+    padding: 0.5rem 0.5rem 0.75rem;
+    background: var(--clr-surface);
+    border: 1px solid color-mix(in oklab, var(--clr-ink) 8%, transparent);
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--clr-ink) 6%, transparent), 0 10px 24px -18px color-mix(in oklab, var(--clr-ink) 45%, transparent);
+    transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s ease;
+  }
+  .product-card::before {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: -0.4rem;
+    inset-inline-start: 50%;
+    width: 3.25rem;
+    height: 0.8rem;
+    translate: -50% 0;
+    background: color-mix(in oklab, var(--clr-highlight) 70%, transparent);
+    pointer-events: none;
+  }
+  :global([dir="rtl"]) .product-card::before { translate: 50% 0; }
+  @media (hover: hover) {
+    .product-card:hover { transform: translateY(-2px); }
+  }
+  .product-card:focus-visible { outline: 2px solid var(--clr-ink); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    .product-card, .card-photo :global(img) { transition: none; }
+    .product-card:hover, .product-card:hover .card-photo :global(img) { transform: none; }
+  }
+  .card-body { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; padding-inline: 0.25rem; }
   .card-rating { display: flex; align-items: center; gap: 0.375rem; font-size: var(--text-xs); }
   .card-rating-count { color: var(--clr-muted); }
   .card-name {
@@ -196,6 +225,7 @@ const filled = rating ? Math.round(rating.avgRating) : 0;
     color: var(--clr-ink);
   }
   @media (min-width: 1024px) { .card-name { font-size: var(--text-base); } }
+  .card-price { border-top: 1px dashed color-mix(in oklab, var(--clr-ink) 22%, transparent); padding-top: 0.5rem; }
   .card-price {
     display: flex;
     flex-wrap: wrap;
