@@ -8,6 +8,11 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${TMPDIR:-/tmp}/sellercove-codespaces"
 mkdir -p "$LOG_DIR"
 
+# Configure private browser-facing origins and local secrets before Wrangler starts.
+if [[ "${CODESPACES:-}" == "true" ]]; then
+  node "$ROOT/cod-server/scripts/configure-sellercove-codespaces.mjs"
+fi
+
 http_responds() {
   curl --silent --show-error --max-time 2 --output /dev/null "http://127.0.0.1:$1/" >/dev/null 2>&1
 }
