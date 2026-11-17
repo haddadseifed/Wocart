@@ -44,7 +44,7 @@ No external font request is needed. Keep Arabic headings untracked (letter-spaci
 2. Catalog / category / collection — breadcrumbs, category navigation, sorting, two-column product grid on phones, three columns on medium screens, merchant-selected 2–5 columns on desktop, pagination and honest empty states.
 3. Search — real product search and sort; normalize common Arabic typing variants without mutating indexed product data.
 4. Product detail — authentic gallery, product name, store-configured DZD price, variants, stock state, description, actual shipping choice/rate and order form. Show seller attribution only when the platform supplies approved seller data.
-5. Cart / checkout — server-validated prices and inventory, customer and delivery fields, visible shipping line and total, COD only where enabled. The current pilot allows one seller per checkout; mixed-seller checkout must remain blocked until order splitting and per-seller fulfilment are implemented and tested.
+5. Cart / checkout — server-validated prices and inventory, customer and delivery fields, visible shipping line and total, COD only where enabled. The current pilot allows one seller per checkout. Preserve a parent checkout with seller-specific suborders and line-level ownership in the target order architecture; mixed-seller checkout remains blocked until suborders, per-seller stock reservations, shipment/fee allocation, COD reconciliation and returns are implemented and tested.
 6. Thank-you / order tracking — platform-confirmed order outcome only; no invented confirmation promise.
 
 ## 5. Components and behaviour
