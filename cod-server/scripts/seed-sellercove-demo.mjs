@@ -41,7 +41,13 @@ const users = [
   { id: "sellercove-demo-seller-b", name: "SellerCove Demo Seller B", email: "seller-b@example.test", password: passwordB, seller: "sellercove-demo-seller-b", membership: "sellercove-demo-membership-b", role: "owner" },
 ];
 const statements = [
-  `UPDATE stores SET cart_enabled = 1, updated_at = ${q(now)} WHERE id = ${q(STORE_ID)}`,
+  `UPDATE stores SET
+    name = CASE WHEN name IN ('متجر التطوير', 'Development Store') THEN 'SellerCove' ELSE name END,
+    meta_title = COALESCE(NULLIF(meta_title, ''), 'SellerCove | تسوّق بوضوح'),
+    meta_description = COALESCE(NULLIF(meta_description, ''), 'اكتشف المنتجات وتعرّف على تفاصيلها قبل إرسال طلبك.'),
+    cart_enabled = 1,
+    updated_at = ${q(now)}
+    WHERE id = ${q(STORE_ID)}`,
   ...users.flatMap((u) => [
     `INSERT OR IGNORE INTO users (id, name, email, email_verified, role, status, created_at, updated_at, language) VALUES (${q(u.id)}, ${q(u.name)}, ${q(u.email)}, 1, 'staff', 'active', ${Date.now()}, ${Date.now()}, 'ar')`,
     `INSERT OR IGNORE INTO accounts (id, user_id, account_id, provider_id, issuer, password, created_at, updated_at) VALUES (${q("account-" + u.id)}, ${q(u.id)}, ${q(u.id)}, 'credential', 'local:credential', ${q("__PASSWORD__" + u.id)}, ${Date.now()}, ${Date.now()}) ON CONFLICT(id) DO UPDATE SET password = excluded.password, updated_at = excluded.updated_at`,
