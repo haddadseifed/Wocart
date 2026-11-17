@@ -72,13 +72,15 @@ async function main() {
   } finally {
     unlinkSync(file);
   }
-  console.log("\nSellerCove local fixture is ready.");
-  console.log("Store: store-local-dev (cart enabled)");
-  console.log("Seller A: seller-a@example.test / " + passwordA);
-  console.log("Seller B: seller-b@example.test / " + passwordB);
-  console.log("Products: 2,490 DZD (stock 5) and 3,990 DZD (stock 3).");
-  console.log("Credentials are LOCAL TEST ONLY. Never reuse them outside this local database.");
-  if (resetPasswords) console.log("Existing demo account passwords were explicitly reset.");
+  if (process.env.SELLERCOVE_QUIET !== "1") {
+    console.log("\nSellerCove local fixture is ready.");
+    console.log("Store: store-local-dev (cart enabled)");
+    console.log("Seller A: seller-a@example.test / " + passwordA);
+    console.log("Seller B: seller-b@example.test / " + passwordB);
+    console.log("Products: 2,490 DZD (stock 5) and 3,990 DZD (stock 3).");
+    console.log("Credentials are LOCAL TEST ONLY. Never reuse them outside this local database.");
+    if (resetPasswords) console.log("Existing demo account passwords were explicitly reset.");
+  }
 }
 
 main().catch((error) => { console.error(error); process.exit(1); });
