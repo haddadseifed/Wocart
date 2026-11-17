@@ -82,7 +82,11 @@ if (serverKey && storefrontKey && serverKey !== storefrontKey) {
   throw new Error("STORE_API_KEY differs between cod-server/.dev.vars and cod-astro/sellercove/.dev.vars. Reconcile those local values, then rerun; neither file was changed.");
 }
 const storeApiKey = serverKey || storefrontKey || "codflow-dev-store-key";
-const authSecret = existingValue(dashboardVars, "BETTER_AUTH_SECRET") || randomBytes(32).toString("base64url");
+const existingAuthSecret = existingValue(dashboardVars, "BETTER_AUTH_SECRET");
+if (existingAuthSecret && existingAuthSecret.length < 32) {
+  throw new Error("The existing BETTER_AUTH_SECRET is shorter than 32 characters. Replace it with a local secret of at least 32 characters; the existing file was not changed.");
+}
+const authSecret = existingAuthSecret || randomBytes(32).toString("base64url");
 
 upsertEnvFile(serverVars, {
   STORE_API_KEY: storeApiKey,
