@@ -64,49 +64,44 @@ dashboard API URL.
 
 ## Start from a clean local database
 
-Run from the repository root:
+The devcontainer installs the root workspaces and the SellerCove storefront.
+For a first-time or intentionally reset local database, run once from the
+repository root:
 
 ```bash
-npm ci
+npm --prefix cod-server run db:setup:local
+npm --prefix cod-server run db:seed:sellercove:local
 ```
 
-Then, in the `cod-server` directory:
+The setup applies migrations to local D1 and runs the existing idempotent store
+seed. The SellerCove seed adds two synthetic sellers and one product per seller.
+Both commands use local persistence only; do not add `--remote`.
+
+Then start the complete local stack from the repository root:
 
 ```bash
-npm run db:setup:local
-npm run db:seed:sellercove:local
-npm run dev
+bash .devcontainer/start-sellercove.sh
 ```
 
-The first command applies migrations to local D1 and runs the existing
-idempotent store seed. The second adds the two synthetic sellers and products.
-Neither command has a remote mode in this preview workflow. The API listens on
-port 8787.
+The startup script configures private Codespaces origins, starts the API
+(8787), dashboard (4321) and storefront (4322), then waits for each HTTP
+endpoint and prints its readiness result and log path. The devcontainer also
+runs this script automatically on Codespaces start/attach, so you do not need
+three terminals or three separate `npm run dev` commands.
 
-In a second terminal, from `cod-client-astro`:
+Open the forwarded URLs for ports 4321 and 4322 from the Codespaces Ports panel.
+Keep all ports private; the setup script does not change visibility. If you
+pull new commits into an already-running Codespace, restart the Codespace once
+(not Rebuild) so Wrangler reloads the generated local environment before the
+services start.
 
-```bash
-npm ci
-npm run dev -- --host 0.0.0.0 --port 4321
-```
-
-The dashboard listens on port 4321. Open its forwarded URL on the phone, sign in
-at `/sign-in` as `seller-a@example.test` or
-`seller-b@example.test`, then open `/seller/orders`.
-
-In a third terminal, from `cod-astro/sellercove`:
-
-```bash
-npm ci
-npm run dev -- --host 0.0.0.0 --port 4322
-```
-
-The storefront listens on port 4322. Open its forwarded URL on the phone and
-visit `/products/demo-seller-a-product`. Use synthetic buyer details and an
-Algerian wilaya/commune that is offered by the local seeded shipping profile.
-Place one order for Seller A, then refresh the Seller A portal. Seller B's
-portal must not show Seller A's order. The cart pilot rejects a basket mixing
-Seller A and Seller B products.
+The dashboard signs in at `/sign-in` as `seller-a@example.test` or
+`seller-b@example.test`; then open `/seller/orders`. The storefront path
+for the local Seller A fixture is `/products/demo-seller-a-product`. Use
+synthetic buyer details and an Algerian wilaya/commune offered by the local
+seeded shipping profile. Place one order for Seller A, then refresh the Seller
+A portal. Seller B's portal must not show Seller A's order. The cart pilot
+rejects a basket mixing Seller A and Seller B products.
 
 ## Synthetic account credentials
 
